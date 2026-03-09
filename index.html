@@ -54,10 +54,27 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 #statusbar { height:36px; border-top:1px solid #e8e8e8; display:flex; align-items:center; padding:0 24px; justify-content:space-between; flex-shrink:0; }
 #statusbar .left { font-size:10px; letter-spacing:.1em; color:#bbb; text-transform:uppercase; }
 #statusbar .left span { color:#555; }
-#statusbar .right { font-size:10px; letter-spacing:.1em; color:#ccc; text-transform:uppercase; }
+#statusbar .right { font-size:10px; letter-spacing:.1em; color:#ccc; text-transform:uppercase; display:flex; align-items:center; gap:10px; }
 #phase-dot { width:6px; height:6px; border-radius:50%; background:#ccc; display:inline-block; margin-right:8px; transition:background .3s; }
 #phase-dot.active { background:#222; }
 #phase-dot.dissolving { background:#bbb; }
+
+/* ── Info panel ── */
+#info-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(255,255,255,.88); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; }
+#info-overlay.visible { display:flex; }
+#info-panel { background:#fff; border:1px solid #222; width:520px; max-width:90vw; max-height:80vh; overflow-y:auto; padding:36px 40px 32px; position:relative; box-shadow:4px 4px 0 rgba(0,0,0,.06); }
+#info-panel .close-x { position:absolute; top:14px; right:16px; font-size:16px; color:#aaa; cursor:pointer; background:none; border:none; line-height:1; padding:2px 4px; }
+#info-panel .close-x:hover { color:#222; }
+#info-panel h2 { font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#222; margin-bottom:20px; font-weight:700; }
+#info-panel h3 { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:#999; margin:20px 0 8px; font-weight:600; }
+#info-panel .info-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; border-bottom:1px solid #f2f2f2; }
+#info-panel .info-row:last-child { border-bottom:none; }
+#info-panel .info-key { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+#info-panel kbd { font-family:Helvetica,Arial,sans-serif; font-size:9px; letter-spacing:.06em; background:#f5f5f5; border:1px solid #ddd; border-radius:3px; padding:2px 6px; color:#333; white-space:nowrap; line-height:1.4; }
+#info-panel .info-desc { font-size:10px; letter-spacing:.05em; color:#777; text-align:right; }
+#info-panel .info-note { font-size:9px; letter-spacing:.05em; color:#bbb; margin-top:16px; line-height:1.5; }
+.btn-info { font-family:Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; width:24px; height:24px; border:1px solid #ccc; background:#fff; color:#999; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:all .12s; margin-left:2px; padding:0; }
+.btn-info:hover { border-color:#222; color:#222; }
 
 /* ── 3D annotation label ── */
 .label-3d-card {
@@ -81,8 +98,8 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <div><span id="label-count">#001</span></div>
   </div>
   <div class="actions">
-    <button class="btn" id="btn-random">Random</button>
     <button class="btn" id="btn-letters">Alphabet</button>
+    <button class="btn" id="btn-random">Random</button>
     <button class="btn" id="btn-type">Type</button>
     <span style="display:inline-block;width:1px;height:16px;background:#ddd;margin:0 4px;vertical-align:middle"></span>
     <button class="btn primary" id="btn-view-2d">2D</button>
@@ -132,9 +149,54 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     </div>
   </div>
 </div>
+<div id="info-overlay">
+  <div id="info-panel">
+    <button class="close-x" id="info-close">✕</button>
+    <h2>Brick System</h2>
+
+    <h3>Modes</h3>
+    <div class="info-row"><span class="info-key"><kbd>Random</kbd></span><span class="info-desc">Random brick compositions</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Alphabet</kbd></span><span class="info-desc">Browse A–Z letters built from bricks</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Type</kbd></span><span class="info-desc">Type a word and build it from bricks</span></div>
+
+    <h3>Navigation</h3>
+    <div class="info-row"><span class="info-key"><kbd>Space</kbd></span><span class="info-desc">Next composition / re-render</span></div>
+    <div class="info-row"><span class="info-key"><kbd>←</kbd> <kbd>→</kbd></span><span class="info-desc">Previous / next letter (Alphabet mode)</span></div>
+    <div class="info-row"><span class="info-key"><kbd>A</kbd>–<kbd>Z</kbd></span><span class="info-desc">Jump to letter (Alphabet mode)</span></div>
+    <div class="info-row"><span class="info-key"><kbd>T</kbd></span><span class="info-desc">Open Type input</span></div>
+
+    <h3>Editing</h3>
+    <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Move a brick</span></div>
+    <div class="info-row"><span class="info-key">Double-click</span><span class="info-desc">Rotate brick / label brick (Alphabet)</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Shift</kbd> + Double-click</span><span class="info-desc">Customize brick style</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></span><span class="info-desc">Undo</span></div>
+
+    <h3>Display</h3>
+    <div class="info-row"><span class="info-key"><kbd>Style</kbd> button</span><span class="info-desc">Cycle: Line → Dash → Hatch → preset styles</span></div>
+    <div class="info-row"><span class="info-key"><kbd>2D</kbd> / <kbd>3D</kbd></span><span class="info-desc">Switch view mode</span></div>
+    <div class="info-row"><span class="info-key"><kbd>S</kbd></span><span class="info-desc">Save as PNG</span></div>
+
+    <h3>3D Mode</h3>
+    <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Orbit camera</span></div>
+    <div class="info-row"><span class="info-key">Scroll</span><span class="info-desc">Zoom in / out</span></div>
+    <div class="info-row"><span class="info-key">Click brick</span><span class="info-desc">Highlight + zoom to inspect</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Shift</kbd> + Drag</span><span class="info-desc">Move brick in 3D</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Front</kbd> <kbd>Side</kbd> <kbd>Top</kbd> <kbd>Iso</kbd></span><span class="info-desc">Camera angle presets</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Auto</kbd></span><span class="info-desc">Toggle auto-rotation</span></div>
+
+    <h3>Alphabet Specimen</h3>
+    <div class="info-row"><span class="info-key">Double-click brick</span><span class="info-desc">Toggle anatomy label</span></div>
+    <div class="info-row"><span class="info-key">Double-click empty</span><span class="info-desc">Show / hide all labels</span></div>
+
+    <p class="info-note">Press <kbd>?</kbd> or <kbd>Esc</kbd> to close this panel.</p>
+  </div>
+</div>
 <div id="statusbar">
   <div class="left"><span id="phase-dot"></span><span id="status-text">ready</span></div>
-  <div class="right" id="status-hint">drag · dbl-click=rotate · shift+dbl-click=customize</div>
+  <div class="right">
+    <span id="status-hint">drag · dbl-click=rotate · shift+dbl-click=customize</span>
+    <button type="button" class="btn-info" id="btn-info" title="Help & shortcuts (?)" aria-label="Help">?</button>
+  </div>
 </div>
 <script>
 // ── Canvas setup ──
@@ -1122,8 +1184,31 @@ document.getElementById('btn-save').addEventListener('click',()=>{if(typeMode)ex
 document.getElementById('btn-reset').addEventListener('click',()=>{if(typeMode)exitTypeMode();resetLayout();});
 document.getElementById('btn-undo').addEventListener('click',()=>{if(typeMode)exitTypeMode();undo();});
 
+// ── Info panel ──
+function toggleInfo(){
+  const el=document.getElementById('info-overlay');
+  el.classList.toggle('visible');
+}
+function closeInfo(){
+  document.getElementById('info-overlay').classList.remove('visible');
+}
+document.getElementById('btn-info').addEventListener('click',toggleInfo);
+document.getElementById('info-close').addEventListener('click',closeInfo);
+document.getElementById('info-overlay').addEventListener('click',e=>{
+  if(e.target.id==='info-overlay') closeInfo();
+});
+
 document.addEventListener('keydown',e=>{
   if(e.target.id==='type-input') return;
+
+  // ? or F1 → toggle info
+  const infoOpen = document.getElementById('info-overlay').classList.contains('visible');
+  if(e.key==='?'||(e.code==='Slash'&&e.shiftKey)||e.key==='F1'){
+    e.preventDefault(); toggleInfo(); return;
+  }
+  if(e.key==='Escape' && infoOpen){ closeInfo(); return; }
+  if(infoOpen) return; // swallow all other keys while info is open
+
   if(document.getElementById('custom-panel').classList.contains('visible')){if(e.key==='Escape'){closeCustomPanel();return;}}
   if(phase==='holding'&&currentComp&&currentComp.name==='Alphabet'){
     if(e.code==='Space'&&!e.shiftKey){e.preventDefault();triggerAlphabetLetter(currentLetterIndex+1);return;}
@@ -1133,10 +1218,8 @@ document.addEventListener('keydown',e=>{
       const idx=LETTERS.indexOf(e.key.toUpperCase());if(idx>=0){e.preventDefault();triggerAlphabetLetter(idx);}return;
     }
   }
-  // Word mode: Space re-renders same word with new random style/perspective
   if(e.code==='Space'&&phase==='holding'&&currentComp&&currentComp.name==='Word'){
     e.preventDefault();
-    // Cycle to next random perspective and re-apply style preset
     const randPersp=CARD_C[Math.floor(Math.random()*CARD_C.length)];
     currentPersp=randPersp;
     styleIndex=(styleIndex+1)%STYLE_PRESETS.length;
@@ -1318,7 +1401,7 @@ function highlight3dBrick(group){
     if(child.isLineSegments&&child.material){
       child.material=child.material.clone();child.material.color.set(HIGHLIGHT_COLOR);}
   });
-  const d=group.userData,hint=document.querySelector('#statusbar .right');
+  const d=group.userData,hint=document.getElementById('status-hint');
   if(hint&&d) hint.textContent='Brick #'+(d.brickIndex+1)+'  ·  layer '+d.layer+'  ·  click empty to return';
   const pos=group.position,zoomRadius=Math.max(6,orbit.baseRadius*.35);
   animateOrbitTo(orbit.theta,orbit.phi,50,zoomRadius,pos.x,pos.y,pos.z);
@@ -1345,7 +1428,7 @@ function unhighlight3d(){
     animateOrbitTo(s.theta,s.phi,50,s.radius,s.tx,s.ty,s.tz);
     preHighlightOrbit=null;
   }
-  const hint=document.querySelector('#statusbar .right');
+  const hint=document.getElementById('status-hint');
   if(hint&&viewMode==='3d') hint.textContent=orbit.autoRotate?'auto-rotating · drag to orbit · 2D to edit':'drag to orbit · click brick to inspect · 2D to edit';
 }
 
@@ -1677,7 +1760,7 @@ function update3dAnnotationPosition(){
 }
 buildPanelPills();
 initAlphabetPanel();
-triggerNext();
+triggerAlphabetLetter(0);
 
 </script>
 </body>
