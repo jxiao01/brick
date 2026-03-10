@@ -848,11 +848,14 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
         df=Math.min(df,sd);
       }
       const i=(py*W+px)*4;
+      const alreadyDark=buf[i]<128; // pixel already has an outline from a lower layer
       if(brickStyle==='outline'||brickStyle==='dashed'){
         // Body: white fill + black outline
-        if(db<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(db>-strokeW)buf[i]=buf[i+1]=buf[i+2]=col;}
-        else if(df<=0){
-          buf[i]=buf[i+1]=buf[i+2]=255;
+        if(db<=0){
+          if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
+          if(db>-strokeW) buf[i]=buf[i+1]=buf[i+2]=col;
+        } else if(df<=0){
+          if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
           for(const st of visibleStuds){
             const dx=px+.5-st.sx,dy=py+.5-st.sy;
             if(brickStyle==='outline'){
@@ -866,7 +869,10 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
         }
       } else {
         // Hatch styles — white fill + pattern on top
-        if(db<=0){buf[i]=buf[i+1]=buf[i+2]=255;if((Math.abs(df)%iv)<rw) buf[i]=buf[i+1]=buf[i+2]=col;} else if(df<=0){
+        if(db<=0){
+          if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
+          if((Math.abs(df)%iv)<rw) buf[i]=buf[i+1]=buf[i+2]=col;
+        } else if(df<=0){
           let t=-1;
           for(const st of visibleStuds){
             const nx=(px+.5-st.sx)/st.hw,ny=(py+.5-st.sy)/st.hh,e=nx*nx+ny*ny;
@@ -909,7 +915,11 @@ function renderFrame(){
   const W=canvas.width,H=canvas.height;
   if(!_buf||_buf.length!==W*H*4) _buf=new Uint8ClampedArray(W*H*4);
   const locked=phase==='holding';
-  const sorted=bricks.slice().sort((a,b)=>(a.layer||0)-(b.layer||0));
+  const sorted=bricks.slice().sort((a,b)=>{
+    const ld=(a.layer||0)-(b.layer||0);
+    if(ld!==0) return ld;
+    return (a.ty||0)-(b.ty||0); // same layer: top (smaller ty) first
+  });
 
   // During drag: use cached background (all bricks except the dragged one)
   // to avoid re-rendering expensive custom bricks every mousemove frame
@@ -1223,7 +1233,7 @@ function computeSnapTarget(rawX,rawY){
         // Position dragBrick so that its di-th stud aligns with tsx
         const myStudOffsetX = dragBrick.rotated ? 0 : (-dw/2 + U*(di+0.5));
         const candidateX = tsx - myStudOffsetX;
-        const candidateY=b.ty-BSTK;
+      const candidateY=b.ty-BSTK;
         const dsx=dragStudXs(candidateX);
         const overlap=dsx.filter(dx=>targetStudXs.some(tx=>Math.abs(dx-tx)<U*0.55)).length;
         if(overlap===0) continue;
@@ -1237,17 +1247,14 @@ function computeSnapTarget(rawX,rawY){
     }
 
     // ── HORIZONTAL snap (side by side, same row) ──
-    // Only valid if dragBrick and b are at the same vertical level (within BH/2)
-    if(Math.abs(rawY-b.ty)<BH*0.6){
-      // candidate Y: same row as target, snapped to BSTK grid
+    // candidateY = b.ty exactly (match the row of the target brick)
+    if(Math.abs(rawY-b.ty)<BSTK*0.75){
       const candidateY=b.ty;
-      // Left side of b: dragBrick right edge touches b left edge
       const candidateXL=b.tx-bw/2-dw/2;
-      // Right side of b: dragBrick left edge touches b right edge
       const candidateXR=b.tx+bw/2+dw/2;
       for(const candidateX of [candidateXL,candidateXR]){
         const dist=Math.hypot(rawX-candidateX,rawY-candidateY);
-        if(dist<SNAP_RADIUS&&dist<best){
+        if(dist<SNAP_RADIUS*1.5&&dist<best){
           best=dist;
           bestSnap={target:b,x:candidateX,y:candidateY,overlap:1,dir:'h'};
         }
@@ -1272,11 +1279,20 @@ function computeLayerAtPosition(tx,ty,view,rotated,size){
 function snapToGrid(){
   if(!dragBrick) return;
   const b=dragBrick;
-  // Side view bricks are BH wide (square); top view bricks use normal width but no vertical snap
   const w=(b.view==='side'||b.rotated)?BH:brickW(b.size);
-  const sx2=Math.round(b.tx/w)*w,sy2=Math.round(b.ty/BSTK)*BSTK;
-  if(Math.abs(b.tx-sx2)<12)b.tx=b.x=sx2;
-  if(b.view!=='top'&&Math.abs(b.ty-sy2)<12)b.ty=b.y=sy2;
+  // X: snap to brick-width grid
+  const sx2=Math.round(b.tx/w)*w;
+  if(Math.abs(b.tx-sx2)<12) b.tx=b.x=sx2;
+  // Y: snap to nearest existing brick row (preserves compLetter non-integer ty values)
+  if(b.view!=='top'){
+    let bestDy=Infinity,bestY=b.ty;
+    for(const ob of bricks){
+      if(ob===b) continue;
+      const dy=Math.abs(b.ty-ob.ty);
+      if(dy<BSTK*0.4&&dy<bestDy){bestDy=dy;bestY=ob.ty;}
+    }
+    if(bestDy<BSTK*0.4) b.ty=b.y=bestY;
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1286,7 +1302,11 @@ function saveClean(){
   const oc=document.createElement('canvas');oc.width=canvas.width;oc.height=canvas.height;
   const oc2=oc.getContext('2d');
   const W=oc.width,H=oc.height,buf=new Uint8ClampedArray(W*H*4);buf.fill(255);
-  const sorted=bricks.slice().sort((a,b)=>(a.layer||0)-(b.layer||0));
+  const sorted=bricks.slice().sort((a,b)=>{
+    const ld=(a.layer||0)-(b.layer||0);
+    if(ld!==0) return ld;
+    return (a.ty||0)-(b.ty||0); // same layer: top (smaller ty) first
+  });
   for(const b of sorted){
     if(b.customStyle) continue;
     const bx=b.tx,by=b.ty,iv=Math.max(4.5,6-(b.layer||0)*.35),rw=Math.max(iv*.22,1.2),strokeW=1.5;
