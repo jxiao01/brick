@@ -7,15 +7,27 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; outline:none; }
 body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; user-select:none; }
-#topbar { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:44px; border-bottom:1px solid #e8e8e8; flex-shrink:0; }
-#topbar .meta { font-size:10px; letter-spacing:.13em; color:#999; text-transform:uppercase; display:flex; gap:28px; }
+
+/* ── Topbar ── */
+#topbar { display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:44px; border-bottom:1px solid #e8e8e8; flex-shrink:0; gap:16px; }
+#topbar .meta { font-size:10px; letter-spacing:.13em; color:#bbb; text-transform:uppercase; display:flex; gap:6px; align-items:center; flex-shrink:0; white-space:nowrap; }
 #topbar .meta span { color:#222; }
-#topbar .actions { display:flex; gap:10px; align-items:center; }
-.btn { font-family:Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:6px 14px; border:1px solid #222; background:#fff; color:#222; cursor:pointer; transition:background .12s,color .12s; }
-.btn:hover { background:#222; color:#fff; }
-.btn.primary { background:#222; color:#fff; }
-.btn.primary:hover { background:#555; }
-.btn.active { background:#222; color:#fff; }
+#topbar .meta .sep { color:#e0e0e0; }
+#topbar .actions { display:flex; gap:6px; align-items:center; flex:1; justify-content:flex-end; }
+#topbar .btn-group { display:flex; gap:0; }
+#topbar .btn-group .btn { border-right-width:0; }
+#topbar .btn-group .btn:last-child { border-right-width:1px; }
+#topbar .divider { width:1px; height:16px; background:#e0e0e0; flex-shrink:0; margin:0 4px; }
+
+/* ── Buttons ── */
+.btn { font-family:Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 12px; border:1px solid #ddd; background:#fff; color:#555; cursor:pointer; transition:background .12s,color .12s,border-color .12s; white-space:nowrap; }
+.btn:hover { background:#222; color:#fff; border-color:#222; }
+.btn.primary { background:#222; color:#fff; border-color:#222; }
+.btn.primary:hover { background:#444; }
+.btn.active { background:#222; color:#fff; border-color:#222; }
+.btn:disabled { opacity:.35; cursor:default; pointer-events:none; }
+
+/* ── Custom panel ── */
 #custom-panel { display:none; position:absolute; z-index:100; background:#fff; border:1px solid #222; padding:16px; width:268px; box-shadow:2px 2px 0 rgba(0,0,0,.08); }
 #custom-panel.visible { display:block; }
 #custom-panel h3 { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#999; margin-bottom:12px; cursor:grab; user-select:none; }
@@ -29,60 +41,64 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 .panel-actions .btn { flex:1; text-align:center; padding:7px 8px; }
 #custom-panel .close-x { position:absolute; top:10px; right:10px; font-size:14px; color:#aaa; cursor:pointer; background:none; border:none; line-height:1; padding:2px 4px; }
 #custom-panel .close-x:hover { color:#222; }
+
+/* ── Type bar ── */
 #type-bar { display:none; position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:10; align-items:center; gap:12px; }
 #type-bar.visible { display:flex; }
 #type-bar input { font-family:Helvetica,Arial,sans-serif; font-size:14px; letter-spacing:.15em; text-transform:uppercase; text-align:center; border:1px solid #222; background:#fff; color:#222; padding:7px 16px; width:220px; caret-color:#222; }
 #type-bar .hint { font-size:10px; letter-spacing:.1em; color:#bbb; text-transform:uppercase; white-space:nowrap; }
+
+/* ── Canvas ── */
 #canvas-wrap { flex:1; position:relative; overflow:visible; }
 #main-canvas { display:block; position:absolute; top:0; left:0; cursor:default; }
 #main-canvas.dragging { cursor:grabbing; }
 #view-3d { position:absolute; top:0; left:0; right:0; bottom:0; display:none; background:#fff; overflow:hidden; }
 #view-3d.active { display:block; }
 #view-3d canvas { display:block; width:100%; height:100%; }
-#view-angles { display:none; position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:10; gap:6px; background:rgba(255,255,255,.85); border:1px solid #e0e0e0; padding:4px 6px; border-radius:4px; }
+#view-angles { display:none; position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:10; gap:0; background:#fff; border:1px solid #ddd; }
 #view-angles.visible { display:flex; }
-#view-angles button { font-family:Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:4px 10px; border:1px solid #ccc; background:#fff; color:#555; cursor:pointer; transition:background .15s,color .15s; }
-#view-angles button:hover, #view-angles button.active { background:#222; color:#fff; border-color:#222; }
-#pip-canvas { position:absolute; bottom:12px; left:12px; width:140px; height:105px; border:1px solid rgba(0,0,0,.15); border-radius:4px; z-index:10; display:none; pointer-events:none; }
+#view-angles button { font-family:Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:5px 12px; border:none; border-right:1px solid #ddd; background:#fff; color:#555; cursor:pointer; transition:background .15s,color .15s; }
+#view-angles button:last-child { border-right:none; }
+#view-angles button:hover, #view-angles button.active { background:#222; color:#fff; }
+#pip-canvas { position:absolute; bottom:12px; left:12px; width:140px; height:105px; border:1px solid rgba(0,0,0,.12); z-index:10; display:none; pointer-events:none; }
 #view-3d.active #pip-canvas { display:block; }
-#alphabet-panel { display:none; flex-shrink:0; padding:10px 24px 12px; border-bottom:1px solid #e8e8e8; background:#fafafa; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; }
+
+/* ── Alphabet panel ── */
+#alphabet-panel { display:none; flex-shrink:0; padding:8px 24px 10px; border-bottom:1px solid #e8e8e8; background:#fff; flex-wrap:wrap; gap:4px; align-items:center; justify-content:center; }
 #alphabet-panel.visible { display:flex; }
-#alphabet-panel #alphabet-letters { display:flex; flex-wrap:wrap; gap:6px; }
-#alphabet-panel .panel-label { font-size:10px; letter-spacing:.12em; color:#999; text-transform:uppercase; margin-right:12px; }
-#alphabet-panel .letter-btn { width:28px; height:28px; border:1px solid #ddd; background:#fff; color:#333; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .12s,color .12s,border-color .12s; }
+#alphabet-panel #alphabet-letters { display:flex; flex-wrap:wrap; gap:4px; }
+#alphabet-panel .letter-btn { width:26px; height:26px; border:1px solid #e0e0e0; background:#fff; color:#555; font-size:10px; font-weight:600; letter-spacing:.06em; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .12s,color .12s,border-color .12s; }
 #alphabet-panel .letter-btn:hover, #alphabet-panel .letter-btn.active { background:#222; color:#fff; border-color:#222; }
-#statusbar { height:36px; border-top:1px solid #e8e8e8; display:flex; align-items:center; padding:0 24px; justify-content:space-between; flex-shrink:0; }
-#statusbar .left { font-size:10px; letter-spacing:.1em; color:#bbb; text-transform:uppercase; }
-#statusbar .left span { color:#555; }
-#statusbar .right { font-size:10px; letter-spacing:.1em; color:#ccc; text-transform:uppercase; display:flex; align-items:center; gap:10px; }
-#phase-dot { width:6px; height:6px; border-radius:50%; background:#ccc; display:inline-block; margin-right:8px; transition:background .3s; }
+
+/* ── Statusbar ── */
+#statusbar { height:32px; border-top:1px solid #e8e8e8; display:flex; align-items:center; padding:0 20px; justify-content:space-between; flex-shrink:0; }
+#statusbar .left { font-size:10px; letter-spacing:.1em; color:#bbb; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+#statusbar .left span { color:#444; }
+#statusbar .right { font-size:10px; letter-spacing:.08em; color:#bbb; text-transform:uppercase; }
+#phase-dot { width:5px; height:5px; border-radius:50%; background:#ddd; display:inline-block; transition:background .3s; flex-shrink:0; }
 #phase-dot.active { background:#222; }
-#phase-dot.dissolving { background:#bbb; }
+#phase-dot.dissolving { background:#bbb; animation:pulse .8s ease-in-out infinite alternate; }
+@keyframes pulse { from{opacity:.4} to{opacity:1} }
 
 /* ── Info panel ── */
-#info-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(255,255,255,.88); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; }
+#info-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(255,255,255,.9); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center; }
 #info-overlay.visible { display:flex; }
-#info-panel { background:#fff; border:1px solid #222; width:520px; max-width:90vw; max-height:80vh; overflow-y:auto; padding:36px 40px 32px; position:relative; box-shadow:4px 4px 0 rgba(0,0,0,.06); }
-#info-panel .close-x { position:absolute; top:14px; right:16px; font-size:16px; color:#aaa; cursor:pointer; background:none; border:none; line-height:1; padding:2px 4px; }
+#info-panel { background:#fff; border:1px solid #222; width:540px; max-width:90vw; max-height:82vh; overflow-y:auto; padding:36px 40px 32px; position:relative; }
+#info-panel .close-x { position:absolute; top:14px; right:16px; font-size:15px; color:#bbb; cursor:pointer; background:none; border:none; line-height:1; padding:4px; }
 #info-panel .close-x:hover { color:#222; }
-#info-panel h2 { font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#222; margin-bottom:20px; font-weight:700; }
-#info-panel h3 { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:#999; margin:20px 0 8px; font-weight:600; }
-#info-panel .info-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; border-bottom:1px solid #f2f2f2; }
-#info-panel .info-row:last-child { border-bottom:none; }
-#info-panel .info-key { display:flex; gap:5px; align-items:center; flex-shrink:0; }
-#info-panel kbd { font-family:Helvetica,Arial,sans-serif; font-size:9px; letter-spacing:.06em; background:#f5f5f5; border:1px solid #ddd; border-radius:3px; padding:2px 6px; color:#333; white-space:nowrap; line-height:1.4; }
-#info-panel .info-desc { font-size:10px; letter-spacing:.05em; color:#777; text-align:right; }
-#info-panel .info-note { font-size:9px; letter-spacing:.05em; color:#bbb; margin-top:16px; line-height:1.5; }
-.btn-info { font-family:Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; width:24px; height:24px; border:1px solid #ccc; background:#fff; color:#999; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:all .12s; margin-left:2px; padding:0; }
+#info-panel h2 { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:#222; margin-bottom:24px; font-weight:700; }
+#info-panel h3 { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:#bbb; margin:22px 0 8px; font-weight:600; }
+#info-panel .info-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #f2f2f2; gap:16px; }
+#info-panel .info-row:last-of-type { border-bottom:none; }
+#info-panel .info-key { display:flex; gap:4px; align-items:center; flex-shrink:0; }
+#info-panel kbd { font-family:Helvetica,Arial,sans-serif; font-size:9px; letter-spacing:.05em; background:#f7f7f7; border:1px solid #e0e0e0; padding:2px 7px; color:#333; white-space:nowrap; line-height:1.5; }
+#info-panel .info-desc { font-size:10px; letter-spacing:.05em; color:#888; text-align:right; }
+#info-panel .info-note { font-size:9px; letter-spacing:.05em; color:#ccc; margin-top:20px; line-height:1.6; }
+.btn-info { font-family:Helvetica,Arial,sans-serif; font-size:10px; font-weight:700; width:22px; height:22px; border:1px solid #ddd; background:#fff; color:#bbb; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:all .12s; padding:0; flex-shrink:0; }
 .btn-info:hover { border-color:#222; color:#222; }
 
-/* ── 3D annotation label ── */
-.label-3d-card {
-  background:#fff; border:1px solid #222;
-  padding:7px 11px 8px; white-space:nowrap;
-  opacity:0; transition:opacity .18s;
-  font-family:Helvetica,Arial,sans-serif;
-}
+/* ── 3D annotation card ── */
+.label-3d-card { background:#fff; border:1px solid #222; padding:7px 11px 8px; white-space:nowrap; opacity:0; transition:opacity .18s; font-family:Helvetica,Arial,sans-serif; }
 .label-3d-card.visible { opacity:1; }
 .l3d-meta { font-size:8px; letter-spacing:.16em; color:#bbb; text-transform:uppercase; margin-bottom:3px; }
 .l3d-role { font-size:11px; letter-spacing:.08em; color:#111; font-weight:700; text-transform:uppercase; line-height:1; margin-bottom:2px; }
@@ -93,27 +109,38 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 <body>
 <div id="topbar">
   <div class="meta">
-    <div>A &nbsp;<span id="label-a">—</span></div>
-    <div>C &nbsp;<span id="label-c">—</span></div>
-    <div><span id="label-count">#001</span></div>
+    <span id="label-a">—</span>
+    <span class="sep">·</span>
+    <span id="label-c">—</span>
+    <span class="sep">·</span>
+    <span id="label-count">—</span>
   </div>
   <div class="actions">
-    <button class="btn" id="btn-letters">Alphabet</button>
-    <button class="btn" id="btn-random">Random</button>
-    <button class="btn" id="btn-type">Type</button>
-    <span style="display:inline-block;width:1px;height:16px;background:#ddd;margin:0 4px;vertical-align:middle"></span>
-    <button class="btn primary" id="btn-view-2d">2D</button>
-    <button class="btn" id="btn-view-3d">3D</button>
+    <!-- Content mode group -->
+    <div class="btn-group">
+      <button class="btn" id="btn-random">Random</button>
+      <button class="btn" id="btn-letters">Alphabet</button>
+      <button class="btn" id="btn-type">Type</button>
+    </div>
+    <div class="divider"></div>
+    <!-- View group -->
+    <div class="btn-group">
+      <button class="btn primary" id="btn-view-2d">2D</button>
+      <button class="btn" id="btn-view-3d">3D</button>
+    </div>
+    <button class="btn" id="btn-3d-mode" style="display:none" title="Switch between flat (2D-matched) and stack (layered) 3D layout">Flat</button>
     <button class="btn" id="btn-auto-rotate" style="display:none">Auto</button>
-    <button class="btn" id="btn-style">Style: Line</button>
-    <button class="btn" id="btn-undo" disabled>Undo [Ctrl+Z]</button>
+    <div class="divider"></div>
+    <!-- Actions group -->
+    <button class="btn" id="btn-style">Line</button>
+    <button class="btn" id="btn-undo" disabled>Undo</button>
     <button class="btn" id="btn-reset" disabled>Reset</button>
-    <button class="btn" id="btn-next">Next [Space]</button>
-    <button class="btn primary" id="btn-save">Save [S]</button>
+    <button class="btn" id="btn-next">Next</button>
+    <button class="btn primary" id="btn-save">Save</button>
+    <button type="button" class="btn-info" id="btn-info" title="Help &amp; shortcuts (?)" aria-label="Help">?</button>
   </div>
 </div>
 <div id="alphabet-panel">
-  <span class="panel-label">Letter</span>
   <div id="alphabet-letters"></div>
 </div>
 <div id="canvas-wrap">
@@ -153,49 +180,38 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
   <div id="info-panel">
     <button class="close-x" id="info-close">✕</button>
     <h2>Brick System</h2>
-
     <h3>Modes</h3>
     <div class="info-row"><span class="info-key"><kbd>Random</kbd></span><span class="info-desc">Random brick compositions</span></div>
     <div class="info-row"><span class="info-key"><kbd>Alphabet</kbd></span><span class="info-desc">Browse A–Z letters built from bricks</span></div>
     <div class="info-row"><span class="info-key"><kbd>Type</kbd></span><span class="info-desc">Type a word and build it from bricks</span></div>
-
     <h3>Navigation</h3>
     <div class="info-row"><span class="info-key"><kbd>Space</kbd></span><span class="info-desc">Next composition / re-render</span></div>
     <div class="info-row"><span class="info-key"><kbd>←</kbd> <kbd>→</kbd></span><span class="info-desc">Previous / next letter (Alphabet mode)</span></div>
     <div class="info-row"><span class="info-key"><kbd>A</kbd>–<kbd>Z</kbd></span><span class="info-desc">Jump to letter (Alphabet mode)</span></div>
     <div class="info-row"><span class="info-key"><kbd>T</kbd></span><span class="info-desc">Open Type input</span></div>
-
     <h3>Editing</h3>
-    <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Move a brick</span></div>
-    <div class="info-row"><span class="info-key">Double-click</span><span class="info-desc">Rotate brick / label brick (Alphabet)</span></div>
+    <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Move a brick (snap to stack)</span></div>
+    <div class="info-row"><span class="info-key">Double-click</span><span class="info-desc">Rotate brick</span></div>
     <div class="info-row"><span class="info-key"><kbd>Shift</kbd> + Double-click</span><span class="info-desc">Customize brick style</span></div>
     <div class="info-row"><span class="info-key"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></span><span class="info-desc">Undo</span></div>
-
     <h3>Display</h3>
     <div class="info-row"><span class="info-key"><kbd>Style</kbd> button</span><span class="info-desc">Cycle: Line → Dash → Hatch → preset styles</span></div>
     <div class="info-row"><span class="info-key"><kbd>2D</kbd> / <kbd>3D</kbd></span><span class="info-desc">Switch view mode</span></div>
     <div class="info-row"><span class="info-key"><kbd>S</kbd></span><span class="info-desc">Save as PNG</span></div>
-
     <h3>3D Mode</h3>
     <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Orbit camera</span></div>
     <div class="info-row"><span class="info-key">Scroll</span><span class="info-desc">Zoom in / out</span></div>
     <div class="info-row"><span class="info-key">Click brick</span><span class="info-desc">Highlight + zoom to inspect</span></div>
-    <div class="info-row"><span class="info-key"><kbd>Shift</kbd> + Drag</span><span class="info-desc">Move brick in 3D</span></div>
     <div class="info-row"><span class="info-key"><kbd>Front</kbd> <kbd>Side</kbd> <kbd>Top</kbd> <kbd>Iso</kbd></span><span class="info-desc">Camera angle presets</span></div>
     <div class="info-row"><span class="info-key"><kbd>Auto</kbd></span><span class="info-desc">Toggle auto-rotation</span></div>
-
-    <h3>Alphabet Specimen</h3>
-    <div class="info-row"><span class="info-key">Double-click brick</span><span class="info-desc">Toggle anatomy label</span></div>
-    <div class="info-row"><span class="info-key">Double-click empty</span><span class="info-desc">Show / hide all labels</span></div>
-
+    <div class="info-row"><span class="info-key"><kbd>Flat</kbd> / <kbd>Stack</kbd></span><span class="info-desc">Flat = 1:1 from 2D · Stack = layered exploded view</span></div>
     <p class="info-note">Press <kbd>?</kbd> or <kbd>Esc</kbd> to close this panel.</p>
   </div>
 </div>
 <div id="statusbar">
   <div class="left"><span id="phase-dot"></span><span id="status-text">ready</span></div>
-  <div class="right">
-    <span id="status-hint">drag · dbl-click=rotate · shift+dbl-click=customize</span>
-    <button type="button" class="btn-info" id="btn-info" title="Help & shortcuts (?)" aria-label="Help">?</button>
+  <div class="right" style="display:flex;align-items:center;gap:10px;">
+    <span id="status-hint" style="color:#888;">drag · dbl-click=rotate · shift+dbl-click=customize</span>
   </div>
 </div>
 <script>
@@ -220,14 +236,14 @@ const ALL_MTH = ['Concentric','Dots','H-Lines','Diagonal','Cross-Hatch','Stipple
 
 // ── Style presets ──
 const STYLE_PRESETS = [
-  { label:'Style: Line',        mode:'builtin', builtin:'outline' },
-  { label:'Style: Dash',        mode:'builtin', builtin:'dashed'  },
-  { label:'Style: Hatch',       mode:'builtin', builtin:'hatch'   },
-  { label:'Style: Concentric',  mode:'preset',  tx:'Front',      method:'Concentric' },
-  { label:'Style: Iso Mix',     mode:'preset',  tx:'Isometric',  method:'random'     },
-  { label:'Style: Shadow',      mode:'preset',  tx:'Shadow',     method:'H-Lines'    },
-  { label:'Style: Melt',        mode:'preset',  tx:'Melt',       method:'Stipple'    },
-  { label:'Style: Full Random', mode:'random'                                         },
+  { label:'Line',        mode:'builtin', builtin:'outline' },
+  { label:'Dash',        mode:'builtin', builtin:'dashed'  },
+  { label:'Hatch',       mode:'builtin', builtin:'hatch'   },
+  { label:'Concentric',  mode:'preset',  tx:'Front',      method:'Concentric' },
+  { label:'Iso Mix',     mode:'preset',  tx:'Isometric',  method:'random'     },
+  { label:'Shadow',      mode:'preset',  tx:'Shadow',     method:'H-Lines'    },
+  { label:'Melt',        mode:'preset',  tx:'Melt',       method:'Stipple'    },
+  { label:'Random', mode:'random'                                         },
 ];
 let styleIndex = 0;
 let brickStyle = 'outline';
@@ -267,10 +283,12 @@ let currentLetterIndex = 0;
 // ── State ──
 let bricks=[], phase='idle', phaseTimer=0;
 let currentComp, currentPersp, resultCount=0, animId=null;
-let dragBrick=null, dragOffX=0, dragOffY=0, snapTarget=null;
+let dragBrick=null, dragOffX=0, dragOffY=0, snapTarget=null, _lastSnap=null;
 let savedOriginalLayout=null, undoStack=[], preDragSnapshot=null;
 let currentWord='';
 let typeMode=false, viewMode='2d';
+let layout3dMode='flat'; // 'flat' | 'stack'
+let brickPosTweens=[]; // per-brick position animations
 
 // ════════════════════════════════════════════════════════════
 //  NOISE (Perlin — replaces p5.noise)
@@ -706,8 +724,8 @@ function triggerAlphabetLetter(idx){
 function applyCompAndStart(){
   if(typeMode) exitTypeMode();
   closeCustomPanel();
-  // Clear annotations if switching away from alphabet, or rebuilding layout
   clearAnnotations();
+  resizeCanvas(); // ensure canvas dimensions are current before computing positions
   const cx=canvas.width/2,cy=canvas.height/2;
   const raw=currentComp.fn(cx,cy);
   const targets=currentPersp.proj(raw,cx,cy);
@@ -812,22 +830,30 @@ function updateBrick(b){
 // ════════════════════════════════════════════════════════════
 let _buf=null,_bgCache=null;
 
-function renderBrickToBuf(buf,W,H,b,bx,by,col){
+function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
   const iv=b.interval||6,rw=Math.max(iv*.22,1.2);
   const bd=getBounds(bx,by,b.view,b.rotated,b.size);
   const x0=Math.max(0,Math.floor(bd.x0)),x1=Math.min(W-1,Math.ceil(bd.x1));
   const y0=Math.max(0,Math.floor(bd.y0)),y1=Math.min(H-1,Math.ceil(bd.y1));
   const strokeW=1.5;
+  const visibleStuds=getStudCenters(bx,by,b.view,b.rotated,b.size)
+    .filter(st=>!coveredStudXs||!coveredStudXs.has(Math.round(st.sx)));
   for(let py=y0;py<=y1;py++){
     for(let px=x0;px<=x1;px++){
       const db=sdfBody(px,py,bx,by,b.view,b.rotated,b.size);
-      const df=getSDF(px,py,bx,by,b.view,b.rotated,b.size);
+      let df=db;
+      for(const st of visibleStuds){
+        const sdx=Math.abs(px+.5-st.sx)-st.hw,sdy=Math.abs(py+.5-st.sy)-st.hh;
+        const sd=Math.min(Math.max(sdx,sdy),0)+Math.sqrt(Math.max(sdx,0)**2+Math.max(sdy,0)**2);
+        df=Math.min(df,sd);
+      }
       const i=(py*W+px)*4;
       if(brickStyle==='outline'||brickStyle==='dashed'){
+        // Body: white fill + black outline
         if(db<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(db>-strokeW)buf[i]=buf[i+1]=buf[i+2]=col;}
         else if(df<=0){
           buf[i]=buf[i+1]=buf[i+2]=255;
-          for(const st of getStudCenters(bx,by,b.view,b.rotated,b.size)){
+          for(const st of visibleStuds){
             const dx=px+.5-st.sx,dy=py+.5-st.sy;
             if(brickStyle==='outline'){
               const dist=Math.sqrt((dx*dx)/(st.hw*st.hw)+(dy*dy)/(st.hh*st.hh));
@@ -839,15 +865,44 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col){
           }
         }
       } else {
-        if(db<=0){buf[i]=buf[i+1]=buf[i+2]=255;if((Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=col;}
-        else if(df<=0){
-          const t=getStudGradient(px+.5,py+.5,bx,by,b.view,b.rotated,b.size);
+        // Hatch styles — white fill + pattern on top
+        if(db<=0){buf[i]=buf[i+1]=buf[i+2]=255;if((Math.abs(df)%iv)<rw) buf[i]=buf[i+1]=buf[i+2]=col;} else if(df<=0){
+          let t=-1;
+          for(const st of visibleStuds){
+            const nx=(px+.5-st.sx)/st.hw,ny=(py+.5-st.sy)/st.hh,e=nx*nx+ny*ny;
+            if(e<=1){t=Math.max(t,Math.max(0,1-e));break;}
+          }
           if(t>=0){const sc2=Math.round(col+t*42);buf[i]=buf[i+1]=buf[i+2]=Math.min(255,sc2);}
           else if((Math.abs(df)%iv)<rw){buf[i]=buf[i+1]=buf[i+2]=col;}
         }
       }
     }
   }
+}
+
+// Returns set of stud X positions (rounded) on brick b that are covered by upper bricks.
+// Upper brick holes are at the same X positions as its own studs (stud-to-hole symmetry).
+function getCoveredStudXs(b,bx,by,allBricks,locked){
+  if(b.view==='top') return new Set();
+  const myStuds=getStudCenters(bx,by,b.view,b.rotated,b.size);
+  if(!myStuds.length) return new Set();
+  const covered=new Set();
+  for(const upper of allBricks){
+    if(upper===b) continue;
+    if(upper.view==='top') continue;
+    const ux=locked?upper.tx:upper.x;
+    const uy=locked?upper.ty:upper.y;
+    // Upper brick is directly on top if its bottom aligns with b's top+stud
+    if(Math.abs((uy+BSTK)-by)>6) continue;
+    const upperStuds=getStudCenters(ux,uy,upper.view,upper.rotated,upper.size);
+    const holeXs=upperStuds.map(st=>st.sx);
+    for(const st of myStuds){
+      if(holeXs.some(hx=>Math.abs(st.sx-hx)<U*0.6)){
+        covered.add(Math.round(st.sx));
+      }
+    }
+  }
+  return covered;
 }
 
 function renderFrame(){
@@ -861,13 +916,30 @@ function renderFrame(){
   if(dragBrick&&_bgCache&&_bgCache.length===W*H*4){
     _buf.set(_bgCache);
     // Draw just the dragged brick on top of the cached background
-    renderBrickToBuf(_buf,W,H,dragBrick,dragBrick.tx,dragBrick.ty,snapTarget&&snapTarget===dragBrick?90:20);
+    const dragCovered=getCoveredStudXs(dragBrick,dragBrick.tx,dragBrick.ty,bricks,true);
+    renderBrickToBuf(_buf,W,H,dragBrick,dragBrick.tx,dragBrick.ty,snapTarget&&snapTarget===dragBrick?90:20,dragCovered);
     const imgData=ctx.createImageData(W,H);imgData.data.set(_buf);ctx.putImageData(imgData,0,0);
-    // If the dragged brick has a custom style, render it on top
+    // If the dragged brick has a custom style, composite it without white-out
     if(dragBrick.customStyle){
       const bd=getBounds(dragBrick.tx,dragBrick.ty,dragBrick.view,dragBrick.rotated,dragBrick.size);
-      ctx.fillStyle='#fff';ctx.fillRect(bd.x0-8,bd.y0-8,(bd.x1-bd.x0)+16,(bd.y1-bd.y0)+16);
-      renderCustomBrick(ctx,dragBrick.tx,dragBrick.ty,dragBrick.customStyle,28/16,dragBrick.view,dragBrick.rotated,dragBrick.size);
+      const pad=6;
+      const rx=Math.max(0,Math.floor(bd.x0-pad)),ry=Math.max(0,Math.floor(bd.y0-pad));
+      const rw=Math.min(W-rx,Math.ceil(bd.x1-bd.x0+pad*2+1));
+      const rh=Math.min(H-ry,Math.ceil(bd.y1-bd.y0+pad*2+1));
+      if(rw>0&&rh>0){
+        const off=document.createElement('canvas');off.width=rw;off.height=rh;
+        const octx=off.getContext('2d');
+        octx.fillStyle='#fff';octx.fillRect(0,0,rw,rh);
+        renderCustomBrick(octx,dragBrick.tx-rx,dragBrick.ty-ry,dragBrick.customStyle,28/16,dragBrick.view,dragBrick.rotated,dragBrick.size);
+        const od=octx.getImageData(0,0,rw,rh).data;
+        const md=ctx.getImageData(rx,ry,rw,rh);const md2=md.data;
+        for(let i=0;i<od.length;i+=4){
+          if(od[i]<245||od[i+1]<245||od[i+2]<245){
+            md2[i]=od[i];md2[i+1]=od[i+1];md2[i+2]=od[i+2];md2[i+3]=255;
+          }
+        }
+        ctx.putImageData(md,rx,ry);
+      }
     }
     return;
   }
@@ -876,18 +948,35 @@ function renderFrame(){
   // Render all non-custom bricks into pixel buffer
   for(const b of sorted){
     const bx=locked?b.tx:b.x,by=locked?b.ty:b.y;
-    if(!b.customStyle) renderBrickToBuf(_buf,W,H,b,bx,by,b===snapTarget?90:20);
+    const covered=getCoveredStudXs(b,bx,by,bricks,locked);
+    if(!b.customStyle) renderBrickToBuf(_buf,W,H,b,bx,by,20,covered);
   }
   const imgData=ctx.createImageData(W,H);imgData.data.set(_buf);ctx.putImageData(imgData,0,0);
-  // Custom-styled bricks: white-out their footprint first, then draw on top
+  // Custom-styled bricks: render to offscreen, composite only non-white pixels
   for(const b of sorted){
     if(!b.customStyle) continue;
     const bx=locked?b.tx:b.x,by=locked?b.ty:b.y;
     const bd=getBounds(bx,by,b.view,b.rotated,b.size);
-    const pad=8;
-    ctx.fillStyle='#fff';
-    ctx.fillRect(bd.x0-pad,bd.y0-pad,(bd.x1-bd.x0)+pad*2,(bd.y1-bd.y0)+pad*2);
-    renderCustomBrick(ctx,bx,by,b.customStyle,28/16,b.view,b.rotated,b.size);
+    const pad=6;
+    const rx=Math.max(0,Math.floor(bd.x0-pad)),ry=Math.max(0,Math.floor(bd.y0-pad));
+    const rw=Math.min(W-rx,Math.ceil(bd.x1-bd.x0+pad*2+1));
+    const rh=Math.min(H-ry,Math.ceil(bd.y1-bd.y0+pad*2+1));
+    if(rw<=0||rh<=0) continue;
+    // Draw to offscreen
+    const off=document.createElement('canvas');off.width=rw;off.height=rh;
+    const octx=off.getContext('2d');
+    octx.fillStyle='#fff';octx.fillRect(0,0,rw,rh);
+    renderCustomBrick(octx,bx-rx,by-ry,b.customStyle,28/16,b.view,b.rotated,b.size);
+    // Read pixels and composite: only overwrite where offscreen is not white
+    const od=octx.getImageData(0,0,rw,rh).data;
+    const md=ctx.getImageData(rx,ry,rw,rh);const md2=md.data;
+    for(let i=0;i<od.length;i+=4){
+      // If offscreen pixel is not near-white, overwrite main canvas
+      if(od[i]<245||od[i+1]<245||od[i+2]<245){
+        md2[i]=od[i];md2[i+1]=od[i+1];md2[i+2]=od[i+2];md2[i+3]=255;
+      }
+    }
+    ctx.putImageData(md,rx,ry);
   }
 }
 
@@ -1001,6 +1090,11 @@ document.getElementById('panel-apply').addEventListener('click',()=>closeCustomP
 // ════════════════════════════════════════════════════════════
 //  DRAG
 // ════════════════════════════════════════════════════════════
+// Bricks that were snapped to another brick need more force to detach
+let _dragCandidate=null,_dragStartX=0,_dragStartY=0;
+const DRAG_THRESHOLD=4;      // px before drag begins (free bricks)
+const DETACH_THRESHOLD=14;   // px before snapped brick detaches
+
 canvas.addEventListener('mousedown',e=>{
   if(phase!=='holding') return;
   const{ox,oy}=canvasXY(e);
@@ -1008,47 +1102,71 @@ canvas.addEventListener('mousedown',e=>{
   for(let i=bricks.length-1;i>=0;i--){
     const b=bricks[i];
     if(hitTest(ox,oy,b.tx,b.ty,b.view,b.rotated,b.size)){
-      preDragSnapshot=snapshot();dragBrick=b;dragOffX=ox-b.tx;dragOffY=oy-b.ty;
-      canvas.classList.add('dragging');bricks.splice(i,1);bricks.push(dragBrick);
-      // Build background cache: render everything except the dragged brick
-      const W=canvas.width,H=canvas.height;
-      const bgBuf=new Uint8ClampedArray(W*H*4);bgBuf.fill(255);
-      const restSorted=bricks.filter(x=>x!==dragBrick).sort((a,c)=>(a.layer||0)-(c.layer||0));
-      for(const rb of restSorted) if(!rb.customStyle) renderBrickToBuf(bgBuf,W,H,rb,rb.tx,rb.ty,20);
-      // Bake into offscreen canvas so custom bricks are included in cache
-      const bgOC=document.createElement('canvas');bgOC.width=W;bgOC.height=H;
-      const bgCtx=bgOC.getContext('2d');
-      const bgID=bgCtx.createImageData(W,H);bgID.data.set(bgBuf);bgCtx.putImageData(bgID,0,0);
-      for(const rb of restSorted){
-        if(!rb.customStyle) continue;
-        const bd=getBounds(rb.tx,rb.ty,rb.view,rb.rotated,rb.size);
-        bgCtx.fillStyle='#fff';bgCtx.fillRect(bd.x0-8,bd.y0-8,(bd.x1-bd.x0)+16,(bd.y1-bd.y0)+16);
-        renderCustomBrick(bgCtx,rb.tx,rb.ty,rb.customStyle,28/16,rb.view,rb.rotated,rb.size);
-      }
-      // Read back flattened pixels as cache
-      _bgCache=bgCtx.getImageData(0,0,W,H).data;
-      renderFrame();break;
+      // Determine if this brick is currently snapped (layer>0 = sitting on something)
+      _dragCandidate={b,i,ox,oy,snapped:(b.layer||0)>0};
+      _dragStartX=e.clientX;_dragStartY=e.clientY;
+      break;
     }
   }
 });
+
+function _beginDrag(candidate){
+  const{b,i,ox,oy}=candidate;
+  _dragCandidate=null;
+  preDragSnapshot=snapshot();dragBrick=b;dragOffX=ox-b.tx;dragOffY=oy-b.ty;
+  canvas.classList.add('dragging');bricks.splice(i,1);bricks.push(dragBrick);
+  // Build background cache
+  const W=canvas.width,H=canvas.height;
+  const bgBuf=new Uint8ClampedArray(W*H*4);bgBuf.fill(255);
+  const restSorted=bricks.filter(x=>x!==dragBrick).sort((a,c)=>(a.layer||0)-(c.layer||0));
+  for(const rb of restSorted) if(!rb.customStyle) renderBrickToBuf(bgBuf,W,H,rb,rb.tx,rb.ty,20);
+  const bgOC=document.createElement('canvas');bgOC.width=W;bgOC.height=H;
+  const bgCtx=bgOC.getContext('2d');
+  const bgID=bgCtx.createImageData(W,H);bgID.data.set(bgBuf);bgCtx.putImageData(bgID,0,0);
+  for(const rb of restSorted){
+    if(!rb.customStyle) continue;
+    const bd=getBounds(rb.tx,rb.ty,rb.view,rb.rotated,rb.size);
+    bgCtx.fillStyle='#fff';bgCtx.fillRect(bd.x0-8,bd.y0-8,(bd.x1-bd.x0)+16,(bd.y1-bd.y0)+16);
+    renderCustomBrick(bgCtx,rb.tx,rb.ty,rb.customStyle,28/16,rb.view,rb.rotated,rb.size);
+  }
+  _bgCache=bgCtx.getImageData(0,0,W,H).data;
+  renderFrame();
+}
+
 window.addEventListener('mousemove',e=>{
+  if(_dragCandidate&&!dragBrick){
+    const dx=e.clientX-_dragStartX,dy=e.clientY-_dragStartY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const threshold=_dragCandidate.snapped?DETACH_THRESHOLD:DRAG_THRESHOLD;
+    if(dist>=threshold) _beginDrag(_dragCandidate);
+    return;
+  }
   if(!dragBrick) return;
   const{ox,oy}=canvasXY(e);
   const rawX=ox-dragOffX,rawY=oy-dragOffY;
   const snap=computeSnapTarget(rawX,rawY);
+  _lastSnap=snap||null;
   snapTarget=snap?snap.target:null;
   dragBrick.x=dragBrick.tx=snap?snap.x:rawX;
   dragBrick.y=dragBrick.ty=snap?snap.y:rawY;
   renderFrame();
 });
 window.addEventListener('mouseup',()=>{
+  _dragCandidate=null;
   if(!dragBrick) return;
   if(preDragSnapshot){
     const i=bricks.indexOf(dragBrick),cur=snapshot();
     if(cur[i].tx!==preDragSnapshot[i].tx||cur[i].ty!==preDragSnapshot[i].ty) undoStack.push(preDragSnapshot);
     preDragSnapshot=null;
   }
-  const snappedTarget=snapTarget;snapTarget=null;canvas.classList.remove('dragging');
+  const finalSnap=_lastSnap;
+  _lastSnap=null;
+  if(finalSnap){
+    dragBrick.tx=dragBrick.x=Math.round(finalSnap.x);
+    dragBrick.ty=dragBrick.y=Math.round(finalSnap.y);
+  }
+  const snappedTarget=finalSnap?finalSnap.target:null;
+  snapTarget=null;canvas.classList.remove('dragging');
   if(!snappedTarget) snapToGrid();
   dragBrick.layer=snappedTarget?(snappedTarget.layer||0)+1:computeLayerAtPosition(dragBrick.tx,dragBrick.ty,dragBrick.view,dragBrick.rotated,dragBrick.size);
   dragBrick=null;_bgCache=null;renderFrame();updateUndoButton();
@@ -1082,17 +1200,63 @@ function canvasXY(e){const r=canvas.getBoundingClientRect();return{ox:e.clientX-
 function hitTest(mx,my,bx,by,view,rotated,size){return getSDF(mx,my,bx,by,view,rotated,size)<=2;}
 function computeSnapTarget(rawX,rawY){
   if(!dragBrick||dragBrick.view!=='front') return null;
-  let best=SNAP_RADIUS,bestSnap=null;
+
+  const dn=dragBrick.rotated?1:(dragBrick.size||4);
+  const dw=brickW(dragBrick.size);
+  function dragStudXs(cx){
+    if(dragBrick.rotated) return [cx];
+    return Array.from({length:dn},(_,i)=>cx-dw/2+U*(i+.5));
+  }
+
+  let best=Infinity, bestSnap=null;
+
   for(const b of bricks){
     if(b===dragBrick||b.view!=='front') continue;
-    const sy=b.ty-BSTK,sx=b.tx+Math.round((rawX-b.tx)/U)*U;
-    const hd=dragBrick.rotated?BH/2:brickW(dragBrick.size)/2,hb=b.rotated?BH/2:brickW(b.size)/2;
-    if(Math.abs(sx-b.tx)>=hd+hb) continue;
-    const dist=Math.hypot(rawX-sx,rawY-sy);
-    if(dist<best){best=dist;bestSnap={target:b,x:sx,y:sy};}
+
+    const bn=b.rotated?1:(b.size||4);
+    const bw=brickW(b.size);
+    const targetStudXs=b.rotated?[b.tx]:Array.from({length:bn},(_,i)=>b.tx-bw/2+U*(i+.5));
+
+    // ── VERTICAL snap (dragBrick on top of b) ──
+    for(const tsx of targetStudXs){
+      for(let di=0;di<dn;di++){
+        // Position dragBrick so that its di-th stud aligns with tsx
+        const myStudOffsetX = dragBrick.rotated ? 0 : (-dw/2 + U*(di+0.5));
+        const candidateX = tsx - myStudOffsetX;
+        const candidateY=b.ty-BSTK;
+        const dsx=dragStudXs(candidateX);
+        const overlap=dsx.filter(dx=>targetStudXs.some(tx=>Math.abs(dx-tx)<U*0.55)).length;
+        if(overlap===0) continue;
+        const dist=Math.hypot(rawX-candidateX,rawY-candidateY);
+        const score=dist-overlap*U*0.5;
+        if(dist<SNAP_RADIUS&&score<best){
+          best=score;
+          bestSnap={target:b,x:candidateX,y:candidateY,overlap,dir:'v'};
+        }
+      }
+    }
+
+    // ── HORIZONTAL snap (side by side, same row) ──
+    // Only valid if dragBrick and b are at the same vertical level (within BH/2)
+    if(Math.abs(rawY-b.ty)<BH*0.6){
+      // candidate Y: same row as target, snapped to BSTK grid
+      const candidateY=b.ty;
+      // Left side of b: dragBrick right edge touches b left edge
+      const candidateXL=b.tx-bw/2-dw/2;
+      // Right side of b: dragBrick left edge touches b right edge
+      const candidateXR=b.tx+bw/2+dw/2;
+      for(const candidateX of [candidateXL,candidateXR]){
+        const dist=Math.hypot(rawX-candidateX,rawY-candidateY);
+        if(dist<SNAP_RADIUS&&dist<best){
+          best=dist;
+          bestSnap={target:b,x:candidateX,y:candidateY,overlap:1,dir:'h'};
+        }
+      }
+    }
   }
   return bestSnap;
 }
+
 function computeLayerAtPosition(tx,ty,view,rotated,size){
   if(view!=='front') return 0;
   const hw=rotated?BH/2:brickW(size)/2,hh=BH/2;
@@ -1104,13 +1268,15 @@ function computeLayerAtPosition(tx,ty,view,rotated,size){
   }
   return maxL>=0?maxL+1:0;
 }
+
 function snapToGrid(){
-  for(const b of bricks){
-    const w=brickW(b.size);
-    const sx2=Math.round(b.tx/w)*w,sy2=Math.round(b.ty/BSTK)*BSTK;
-    if(Math.abs(b.tx-sx2)<12)b.tx=b.x=sx2;
-    if(Math.abs(b.ty-sy2)<12)b.ty=b.y=sy2;
-  }
+  if(!dragBrick) return;
+  const b=dragBrick;
+  // Side view bricks are BH wide (square); top view bricks use normal width but no vertical snap
+  const w=(b.view==='side'||b.rotated)?BH:brickW(b.size);
+  const sx2=Math.round(b.tx/w)*w,sy2=Math.round(b.ty/BSTK)*BSTK;
+  if(Math.abs(b.tx-sx2)<12)b.tx=b.x=sx2;
+  if(b.view!=='top'&&Math.abs(b.ty-sy2)<12)b.ty=b.y=sy2;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1124,17 +1290,20 @@ function saveClean(){
   for(const b of sorted){
     if(b.customStyle) continue;
     const bx=b.tx,by=b.ty,iv=Math.max(4.5,6-(b.layer||0)*.35),rw=Math.max(iv*.22,1.2),strokeW=1.5;
+    const covered=getCoveredStudXs(b,bx,by,bricks,true);
+    const visStuds=getStudCenters(bx,by,b.view,b.rotated,b.size).filter(st=>!covered.has(Math.round(st.sx)));
     const bd=getBounds(bx,by,b.view,b.rotated,b.size);
     const x0=Math.max(0,Math.floor(bd.x0)),x1=Math.min(W-1,Math.ceil(bd.x1));
     const y0=Math.max(0,Math.floor(bd.y0)),y1=Math.min(H-1,Math.ceil(bd.y1));
     for(let py=y0;py<=y1;py++){for(let px=x0;px<=x1;px++){
       const dc=sdfBody(px,py,bx,by,b.view,b.rotated,b.size);
-      const df=getSDF(px,py,bx,by,b.view,b.rotated,b.size);
+      let df=dc;
+      for(const st of visStuds){const sdx=Math.abs(px+.5-st.sx)-st.hw,sdy=Math.abs(py+.5-st.sy)-st.hh;df=Math.min(df,Math.min(Math.max(sdx,sdy),0)+Math.sqrt(Math.max(sdx,0)**2+Math.max(sdy,0)**2));}
       const i=(py*W+px)*4;
       if(brickStyle==='outline'||brickStyle==='dashed'){
         if(dc<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(dc>-strokeW)buf[i]=buf[i+1]=buf[i+2]=20;}
         else if(df<=0){buf[i]=buf[i+1]=buf[i+2]=255;
-          for(const st of getStudCenters(bx,by,b.view,b.rotated,b.size)){
+          for(const st of visStuds){
             const dx=px+.5-st.sx,dy=py+.5-st.sy;
             if(brickStyle==='outline'){const dist=Math.sqrt((dx*dx)/(st.hw*st.hw)+(dy*dy)/(st.hh*st.hh));if(dist<=1&&dist>1-strokeW/Math.min(st.hw,st.hh)){buf[i]=buf[i+1]=buf[i+2]=20;break;}}
             else{const nx=dx/st.hw,ny=dy/st.hh,e=nx*nx+ny*ny;if(e<=1&&e>(1-.18)){buf[i]=buf[i+1]=buf[i+2]=20;break;}}
@@ -1142,7 +1311,7 @@ function saveClean(){
         }
       } else {
         if(dc<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(df<=0&&(Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=20;}
-        else if(df<=0){const t=getStudGradient(px+.5,py+.5,bx,by,b.view,b.rotated,b.size);
+        else if(df<=0){let t=-1;for(const st of visStuds){const nx=(px+.5-st.sx)/st.hw,ny=(py+.5-st.sy)/st.hh,e=nx*nx+ny*ny;if(e<=1){t=Math.max(0,1-e);break;}}
           if(t>=0)buf[i]=buf[i+1]=buf[i+2]=Math.min(255,Math.round(20+t*42));
           else if((Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=20;
         }
@@ -1150,7 +1319,27 @@ function saveClean(){
     }}
   }
   const id=oc2.createImageData(W,H);id.data.set(buf);oc2.putImageData(id,0,0);
-  for(const b of sorted){if(b.customStyle) renderCustomBrick(oc2,b.tx,b.ty,b.customStyle,28/16,b.view,b.rotated,b.size);}
+  for(const b of sorted){
+    if(!b.customStyle) continue;
+    const bd=getBounds(b.tx,b.ty,b.view,b.rotated,b.size);
+    const pad=6;
+    const rx=Math.max(0,Math.floor(bd.x0-pad)),ry=Math.max(0,Math.floor(bd.y0-pad));
+    const rw=Math.min(W-rx,Math.ceil(bd.x1-bd.x0+pad*2+1));
+    const rh=Math.min(H-ry,Math.ceil(bd.y1-bd.y0+pad*2+1));
+    if(rw<=0||rh<=0) continue;
+    const off=document.createElement('canvas');off.width=rw;off.height=rh;
+    const octx=off.getContext('2d');
+    octx.fillStyle='#fff';octx.fillRect(0,0,rw,rh);
+    renderCustomBrick(octx,b.tx-rx,b.ty-ry,b.customStyle,28/16,b.view,b.rotated,b.size);
+    const od=octx.getImageData(0,0,rw,rh).data;
+    const md=oc2.getImageData(rx,ry,rw,rh);const md2=md.data;
+    for(let i=0;i<od.length;i+=4){
+      if(od[i]<245||od[i+1]<245||od[i+2]<245){
+        md2[i]=od[i];md2[i+1]=od[i+1];md2[i+2]=od[i+2];md2[i+3]=255;
+      }
+    }
+    oc2.putImageData(md,rx,ry);
+  }
   const a=document.createElement('a');
   a.download=currentComp&&currentComp.name==='Alphabet'?'brick_letter_'+(LETTERS[currentLetterIndex]||'A')+'.png':
     currentComp&&currentComp.name==='Word'?'brick_word_'+currentWord+'.png':
@@ -1185,30 +1374,18 @@ document.getElementById('btn-reset').addEventListener('click',()=>{if(typeMode)e
 document.getElementById('btn-undo').addEventListener('click',()=>{if(typeMode)exitTypeMode();undo();});
 
 // ── Info panel ──
-function toggleInfo(){
-  const el=document.getElementById('info-overlay');
-  el.classList.toggle('visible');
-}
-function closeInfo(){
-  document.getElementById('info-overlay').classList.remove('visible');
-}
+function toggleInfo(){document.getElementById('info-overlay').classList.toggle('visible');}
+function closeInfo(){document.getElementById('info-overlay').classList.remove('visible');}
 document.getElementById('btn-info').addEventListener('click',toggleInfo);
 document.getElementById('info-close').addEventListener('click',closeInfo);
-document.getElementById('info-overlay').addEventListener('click',e=>{
-  if(e.target.id==='info-overlay') closeInfo();
-});
+document.getElementById('info-overlay').addEventListener('click',e=>{if(e.target.id==='info-overlay')closeInfo();});
 
 document.addEventListener('keydown',e=>{
   if(e.target.id==='type-input') return;
-
-  // ? or F1 → toggle info
-  const infoOpen = document.getElementById('info-overlay').classList.contains('visible');
-  if(e.key==='?'||(e.code==='Slash'&&e.shiftKey)||e.key==='F1'){
-    e.preventDefault(); toggleInfo(); return;
-  }
-  if(e.key==='Escape' && infoOpen){ closeInfo(); return; }
-  if(infoOpen) return; // swallow all other keys while info is open
-
+  const infoOpen=document.getElementById('info-overlay').classList.contains('visible');
+  if(e.key==='?'||(e.code==='Slash'&&e.shiftKey)||e.key==='F1'){e.preventDefault();toggleInfo();return;}
+  if(e.key==='Escape'&&infoOpen){closeInfo();return;}
+  if(infoOpen) return;
   if(document.getElementById('custom-panel').classList.contains('visible')){if(e.key==='Escape'){closeCustomPanel();return;}}
   if(phase==='holding'&&currentComp&&currentComp.name==='Alphabet'){
     if(e.code==='Space'&&!e.shiftKey){e.preventDefault();triggerAlphabetLetter(currentLetterIndex+1);return;}
@@ -1218,8 +1395,10 @@ document.addEventListener('keydown',e=>{
       const idx=LETTERS.indexOf(e.key.toUpperCase());if(idx>=0){e.preventDefault();triggerAlphabetLetter(idx);}return;
     }
   }
+  // Word mode: Space re-renders same word with new random style/perspective
   if(e.code==='Space'&&phase==='holding'&&currentComp&&currentComp.name==='Word'){
     e.preventDefault();
+    // Cycle to next random perspective and re-apply style preset
     const randPersp=CARD_C[Math.floor(Math.random()*CARD_C.length)];
     currentPersp=randPersp;
     styleIndex=(styleIndex+1)%STYLE_PRESETS.length;
@@ -1238,7 +1417,7 @@ function setStatus(s){
   dot.className='';
   if(s==='holding'){dot.classList.add('active');text.textContent='holding';
     if(hint&&viewMode==='2d'){
-      if(currentComp&&currentComp.name==='Alphabet') hint.textContent='← → to change letter · switch to 3D · click brick to annotate · S save';
+      if(currentComp&&currentComp.name==='Alphabet') hint.textContent='← → to change letter · 3D to view · click brick to annotate · S to save';
       else hint.textContent=currentPersp&&currentPersp.name==='Top View'?'Top view: flat bricks (no studs) · Next for other angles':'drag · dbl-click=rotate · shift+dbl-click=customize';
     }}
   if(s==='condensing'){dot.classList.add('active');text.textContent='assembling';}
@@ -1340,22 +1519,119 @@ function createBrickMesh3D(){
   return group;
 }
 
+function getBrickPos3D(b,mode,cx,cy){
+  const s=SCALE_2D_TO_3D;
+  if(mode==='flat'){
+    // 1:1 from 2D — X=horizontal, Y=vertical(inverted), Z=0
+    return {x:(b.tx-cx)*s, y:-(b.ty-cy)*s, z:0};
+  } else {
+    // stack: exploded by layer — original behaviour
+    return {x:-(b.tx-cx)*s, y:(b.layer||0)*BSTK*s, z:-(b.ty-cy)*s};
+  }
+}
+
+function updateLightForMode(){
+  scene3d.children.forEach(c=>{
+    if(c.isDirectionalLight&&c.castShadow){
+      if(layout3dMode==='flat'){
+        c.position.set(6,18,12);
+        c.shadow.camera.left=-50;c.shadow.camera.right=50;
+        c.shadow.camera.top=50;c.shadow.camera.bottom=-50;
+      } else {
+        c.position.set(8,20,10);
+        c.shadow.camera.left=-30;c.shadow.camera.right=30;
+        c.shadow.camera.top=30;c.shadow.camera.bottom=-30;
+      }
+      c.shadow.camera.updateProjectionMatrix();
+    }
+    // ground plane shadow only meaningful in stack mode
+    if(c.isMesh&&c.material&&c.material.isShadowMaterial) c.visible=(layout3dMode==='stack');
+  });
+}
+
+function _recalcOrbitBounds(){
+  const s=SCALE_2D_TO_3D;
+  const ch=bricksGroup3d.children;
+  const avgY=ch.length?ch.reduce((a,c)=>a+c.position.y,0)/ch.length:0;
+  sceneCenterY3d=avgY;
+  let maxE=0;
+  ch.forEach(c=>{maxE=Math.max(maxE,Math.abs(c.position.x),Math.abs(c.position.y-avgY),Math.abs(c.position.z));});
+  const hb=(BW/2)*s;
+  orbit.radius=Math.max(14,(maxE+hb*2)*2.2);orbit.baseRadius=orbit.radius;
+  orbit.targetX=0;orbit.targetY=sceneCenterY3d;orbit.targetZ=0;
+  if(pipCamera){const ext=Math.max(4,maxE+hb*2)*1.3;pipCamera.left=-ext;pipCamera.right=ext;pipCamera.top=ext*.75;pipCamera.bottom=-ext*.75;pipCamera.updateProjectionMatrix();}
+}
+
 function syncBricksTo3D(){
   if(!bricksGroup3d) return;
+  brickPosTweens=[];
   while(bricksGroup3d.children.length)bricksGroup3d.remove(bricksGroup3d.children[0]);
-  const s=SCALE_2D_TO_3D;
   const cx=bricks.length?bricks.reduce((a,b)=>a+b.tx,0)/bricks.length:0;
   const cy=bricks.length?bricks.reduce((a,b)=>a+b.ty,0)/bricks.length:0;
   bricks.forEach((b,idx)=>{
     const mesh=createBrickMesh3D();
-    mesh.position.set(-(b.tx-cx)*s,(b.layer||0)*BSTK*s,-(b.ty-cy)*s);
-    mesh.userData={brickIndex:idx,layer:b.layer||0,tx:b.tx,ty:b.ty};bricksGroup3d.add(mesh);
+    const p=getBrickPos3D(b,layout3dMode,cx,cy);
+    mesh.position.set(p.x,p.y,p.z);
+    mesh.userData={brickIndex:idx,layer:b.layer||0,tx:b.tx,ty:b.ty};
+    bricksGroup3d.add(mesh);
   });
-  sceneCenterY3d=bricks.length?bricks.reduce((a,b)=>a+(b.layer||0)*BSTK*s,0)/bricks.length:0;
-  let maxE=0;bricksGroup3d.traverse(c=>{if(c.position){const dx=Math.abs(c.position.x),dz=Math.abs(c.position.z),dy=Math.abs(c.position.y-sceneCenterY3d);maxE=Math.max(maxE,dx,dy,dz);}});
-  const hb=(BW/2)*s;orbit.radius=Math.max(14,(maxE+hb*2)*2.2);orbit.baseRadius=orbit.radius;
-  orbit.targetX=0;orbit.targetY=sceneCenterY3d;orbit.targetZ=0;
-  if(pipCamera){const ext=Math.max(4,maxE+hb*2)*1.3;pipCamera.left=-ext;pipCamera.right=ext;pipCamera.top=ext*.75;pipCamera.bottom=-ext*.75;pipCamera.updateProjectionMatrix();}
+  updateLightForMode();
+  _recalcOrbitBounds();
+}
+
+function switchLayout3D(toMode){
+  if(toMode===layout3dMode||!bricksGroup3d||!bricksGroup3d.children.length) return;
+  layout3dMode=toMode;
+  const btn=document.getElementById('btn-3d-mode');
+  btn.textContent=toMode==='flat'?'Flat':'Stack';
+  btn.title=toMode==='flat'?'Currently: Flat layout (1:1 from 2D) — click for Stack':'Currently: Stack layout (layered) — click for Flat';
+
+  const cx=bricks.length?bricks.reduce((a,b)=>a+b.tx,0)/bricks.length:0;
+  const cy=bricks.length?bricks.reduce((a,b)=>a+b.ty,0)/bricks.length:0;
+  const DUR=800;
+  const start=performance.now();
+
+  brickPosTweens=bricksGroup3d.children.map((mesh,i)=>{
+    const b=bricks[i]; if(!b) return null;
+    const from={x:mesh.position.x,y:mesh.position.y,z:mesh.position.z};
+    const to=getBrickPos3D(b,toMode,cx,cy);
+    return {mesh,from,to,delay:i*15,dur:DUR};
+  }).filter(Boolean);
+
+  updateLightForMode();
+  const frozenTargetY=orbit.targetY;
+
+  function step(){
+    const now=performance.now()-start;
+    let allDone=true;
+    brickPosTweens.forEach(t=>{
+      const elapsed=Math.max(0,now-t.delay);
+      const raw=Math.min(1,elapsed/t.dur);
+      const e=raw<.5?4*raw*raw*raw:(raw-1)*(2*raw-2)*(2*raw-2)+1;
+      t.mesh.position.set(
+        t.from.x+(t.to.x-t.from.x)*e,
+        t.from.y+(t.to.y-t.from.y)*e,
+        t.from.z+(t.to.z-t.from.z)*e
+      );
+      if(raw<1) allDone=false;
+    });
+    orbit.targetY=frozenTargetY;
+    if(!allDone){ requestAnimationFrame(step); return; }
+    brickPosTweens=[];
+    const ch=bricksGroup3d.children;
+    const newY=ch.length?ch.reduce((a,c)=>a+c.position.y,0)/ch.length:0;
+    const camFrom=frozenTargetY,camDur=350,camT=performance.now();
+    function camStep(){
+      const p=Math.min(1,(performance.now()-camT)/camDur);
+      const e=p<.5?4*p*p*p:(p-1)*(2*p-2)*(2*p-2)+1;
+      orbit.targetY=camFrom+(newY-camFrom)*e;
+      sceneCenterY3d=orbit.targetY;
+      if(p<1) requestAnimationFrame(camStep);
+      else _recalcOrbitBounds();
+    }
+    requestAnimationFrame(camStep);
+  }
+  requestAnimationFrame(step);
 }
 
 function setOrbitFrom2DView(){
@@ -1459,7 +1735,12 @@ function setViewMode(mode){
   if(typeMode)exitTypeMode();
   if(mode==='3d'){
     v3d.classList.add('active');b3d.classList.add('primary');b2d.classList.remove('primary');
-    document.getElementById('btn-auto-rotate').style.display='';ap&&ap.classList.add('visible');
+    document.getElementById('btn-auto-rotate').style.display='';
+    document.getElementById('btn-3d-mode').style.display='';
+    const _m3btn=document.getElementById('btn-3d-mode');
+    _m3btn.textContent=layout3dMode==='flat'?'Flat':'Stack';
+    _m3btn.title=layout3dMode==='flat'?'Currently: Flat layout (1:1 from 2D) — click for Stack':'Currently: Stack layout (layered) — click for Flat';
+    ap&&ap.classList.add('visible');
     if(typeof THREE==='undefined')return;
     initView3D();syncBricksTo3D();setOrbitFrom2DView();onResize3d();if(!anim3dId)loop3d();
     // Restore highlight if a brick was selected before switching to 2D
@@ -1469,7 +1750,9 @@ function setViewMode(mode){
     }
   } else {
     v3d.classList.remove('active');b2d.classList.add('primary');b3d.classList.remove('primary');
-    document.getElementById('btn-auto-rotate').style.display='none';ap&&ap.classList.remove('visible');
+    document.getElementById('btn-auto-rotate').style.display='none';
+    document.getElementById('btn-3d-mode').style.display='none';
+    ap&&ap.classList.remove('visible');
     // Save which brick was highlighted so we can restore on next 3D entry
     if(highlighted3d&&bricksGroup3d){
       _pendingHighlightIndex=bricksGroup3d.children.indexOf(highlighted3d);
@@ -1484,6 +1767,9 @@ function setViewMode(mode){
 
 document.getElementById('btn-view-2d').addEventListener('click',()=>setViewMode('2d'));
 document.getElementById('btn-view-3d').addEventListener('click',()=>setViewMode('3d'));
+document.getElementById('btn-3d-mode').addEventListener('click',()=>{
+  switchLayout3D(layout3dMode==='flat'?'stack':'flat');
+});
 document.getElementById('btn-auto-rotate').addEventListener('click',()=>{if(viewMode!=='3d')return;orbit.autoRotate=!orbit.autoRotate;document.getElementById('btn-auto-rotate').classList.toggle('active',orbit.autoRotate);});
 
 const ANGLE_PRESETS={front:{theta:-Math.PI/2,phi:Math.PI/2},side:{theta:0,phi:Math.PI*.38},top:{theta:0,phi:.05},iso:{theta:-Math.PI/4,phi:Math.PI*.42}};
@@ -1709,13 +1995,14 @@ function show3dAnnotationLabel(group){
   // 3D leader line in scene
   const s=SCALE_2D_TO_3D;
   const brickTopY=BH*s;
-  const lineStart=group.position.clone();
+  const worldPos=new THREE.Vector3();
+  group.getWorldPosition(worldPos);
+  const lineStart=worldPos.clone();
   lineStart.y+=brickTopY+SH*s*0.5;
-  // Anchor point: slightly above brick top (where label stem connects)
-  const anchorWorld=group.position.clone();
-  anchorWorld.y+=brickTopY+SH*s+0.06;
+  const lineEnd=worldPos.clone();
+  lineEnd.y+=brickTopY+SH*s+0.06;
 
-  const pts=[lineStart,anchorWorld];
+  const pts=[lineStart,lineEnd];
   const geo=new THREE.BufferGeometry().setFromPoints(pts);
   const mat=new THREE.LineBasicMaterial({color:0x222222});
   const leaderLine=new THREE.Line(geo,mat);
@@ -1728,7 +2015,7 @@ function show3dAnnotationLabel(group){
   dot.position.copy(lineStart);
   scene3d.add(dot);
 
-  _annotationLabel3d={el,leaderLine,dot,anchorWorld,group};
+  _annotationLabel3d={el,leaderLine,dot,group};
   // Fade in
   requestAnimationFrame(()=>{ el.style.opacity='1'; el.querySelector('.label-3d-card').classList.add('visible'); });
 }
@@ -1744,23 +2031,34 @@ function remove3dAnnotationLabel(){
   _annotationLabel3d=null;
 }
 
-// Called every frame from loop3d — projects 3D anchor to screen, moves DOM card
+// Called every frame from loop3d — recomputes world position each frame so label tracks rotation
 function update3dAnnotationPosition(){
   if(!_annotationLabel3d||!camera3d||!renderer3d) return;
-  const {el,anchorWorld}=_annotationLabel3d;
-  const projected=anchorWorld.clone();
-  projected.project(camera3d);
-  const w=renderer3d.domElement.clientWidth||renderer3d.domElement.offsetWidth;
-  const h=renderer3d.domElement.clientHeight||renderer3d.domElement.offsetHeight;
-  const sx=(projected.x+1)/2*w;
-  const sy=(-projected.y+1)/2*h;
-  // Place card to the right of the projected anchor point
+  const {el,group}=_annotationLabel3d;
+  const s=SCALE_2D_TO_3D;
+  const brickTopY=BH*s;
+  // Recompute world position every frame (tracks auto-rotate and view changes)
+  const worldPos=new THREE.Vector3();
+  group.getWorldPosition(worldPos);
+  worldPos.y+=brickTopY+SH*s+0.06;
+  worldPos.project(camera3d);
+  const container=document.getElementById('view-3d');
+  const w=container.clientWidth||renderer3d.domElement.offsetWidth;
+  const h=container.clientHeight||renderer3d.domElement.offsetHeight;
+  const sx=(worldPos.x+1)/2*w;
+  const sy=(-worldPos.y+1)/2*h;
   el.style.left=(sx+12)+'px';
   el.style.top=sy+'px';
 }
 buildPanelPills();
 initAlphabetPanel();
-triggerAlphabetLetter(0);
+// Start in Alphabet mode at letter A
+currentComp=CARD_A.find(c=>c.name==='Alphabet');
+currentPersp=CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
+currentLetterIndex=0;
+document.getElementById('btn-letters').classList.add('active');
+document.getElementById('alphabet-panel').classList.add('visible');
+applyCompAndStart();
 
 </script>
 </body>
