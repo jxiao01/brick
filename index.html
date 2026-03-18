@@ -42,6 +42,12 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 #custom-panel .close-x { position:absolute; top:10px; right:10px; font-size:14px; color:#aaa; cursor:pointer; background:none; border:none; line-height:1; padding:2px 4px; }
 #custom-panel .close-x:hover { color:#222; }
 
+/* ── Brick context menu ── */
+#brick-ctx-menu { display:none; position:fixed; z-index:200; background:#fff; border:1px solid #222; min-width:120px; box-shadow:2px 2px 0 rgba(0,0,0,.08); }
+#brick-ctx-menu.visible { display:block; }
+#brick-ctx-menu button { display:flex; align-items:center; width:100%; padding:8px 14px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#444; background:none; border:none; cursor:pointer; text-align:left; white-space:nowrap; }
+#brick-ctx-menu button:hover { background:#f5f5f5; color:#111; }
+
 /* ── Type bar ── */
 #type-bar { display:none; position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:10; align-items:center; gap:12px; }
 #type-bar.visible { display:flex; }
@@ -154,6 +160,10 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
       <button data-angle="iso">Iso</button>
     </div>
   </div>
+  <div id="brick-ctx-menu">
+    <button id="ctx-rotate">Rotate</button>
+    <button id="ctx-customize">Customize</button>
+  </div>
   <div id="type-bar">
     <input type="text" id="type-input" placeholder="TYPE HERE">
     <span class="hint">Enter ↵</span>
@@ -192,7 +202,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <h3>Editing</h3>
     <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Move a brick (snap to stack)</span></div>
     <div class="info-row"><span class="info-key">Double-click</span><span class="info-desc">Rotate brick</span></div>
-    <div class="info-row"><span class="info-key"><kbd>Shift</kbd> + Double-click</span><span class="info-desc">Customize brick style</span></div>
+    <div class="info-row"><span class="info-key">Right-click</span><span class="info-desc">Rotate or customize brick style</span></div>
     <div class="info-row"><span class="info-key"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></span><span class="info-desc">Undo</span></div>
     <h3>Display</h3>
     <div class="info-row"><span class="info-key"><kbd>Style</kbd> button</span><span class="info-desc">Cycle: Line → Dash → Hatch → preset styles</span></div>
@@ -211,7 +221,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 <div id="statusbar">
   <div class="left"><span id="phase-dot"></span><span id="status-text">ready</span></div>
   <div class="right" style="display:flex;align-items:center;gap:10px;">
-    <span id="status-hint" style="color:#888;">drag · dbl-click=rotate · shift+dbl-click=customize</span>
+    <span id="status-hint" style="color:#888;">drag · dbl-click=rotate · right-click=more</span>
   </div>
 </div>
 <script>
@@ -835,7 +845,7 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
   const bd=getBounds(bx,by,b.view,b.rotated,b.size);
   const x0=Math.max(0,Math.floor(bd.x0)),x1=Math.min(W-1,Math.ceil(bd.x1));
   const y0=Math.max(0,Math.floor(bd.y0)),y1=Math.min(H-1,Math.ceil(bd.y1));
-  const strokeW=1.5;
+  const strokeW=0.9;
   const visibleStuds=getStudCenters(bx,by,b.view,b.rotated,b.size)
     .filter(st=>!coveredStudXs||!coveredStudXs.has(Math.round(st.sx)));
   for(let py=y0;py<=y1;py++){
@@ -848,11 +858,12 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
         df=Math.min(df,sd);
       }
       const i=(py*W+px)*4;
-      const alreadyDark=buf[i]<128; // pixel already has an outline from a lower layer
+      const alreadyDark=buf[i]<128;
       if(brickStyle==='outline'||brickStyle==='dashed'){
-        // Body: white fill + black outline
         if(db<=0){
+          // White fill: skip if already a dark outline from another brick
           if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
+          // Own outline: always draw (restores it even if white fill was skipped)
           if(db>-strokeW) buf[i]=buf[i+1]=buf[i+2]=col;
         } else if(df<=0){
           if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
@@ -868,7 +879,6 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs){
           }
         }
       } else {
-        // Hatch styles — white fill + pattern on top
         if(db<=0){
           if(!alreadyDark) buf[i]=buf[i+1]=buf[i+2]=255;
           if((Math.abs(df)%iv)<rw) buf[i]=buf[i+1]=buf[i+2]=col;
@@ -896,14 +906,15 @@ function getCoveredStudXs(b,bx,by,allBricks,locked){
   for(const upper of allBricks){
     if(upper===b) continue;
     if(upper.view==='top') continue;
+    // Only bricks that are exactly one BSTK above can cover studs
+    if((upper.layer||0) <= (b.layer||0)) continue; // upper must be higher layer
     const ux=locked?upper.tx:upper.x;
     const uy=locked?upper.ty:upper.y;
-    // Upper brick is directly on top if its bottom aligns with b's top+stud
-    if(Math.abs((uy+BSTK)-by)>6) continue;
+    if(Math.abs((uy+BSTK)-by)>4) continue;
     const upperStuds=getStudCenters(ux,uy,upper.view,upper.rotated,upper.size);
     const holeXs=upperStuds.map(st=>st.sx);
     for(const st of myStuds){
-      if(holeXs.some(hx=>Math.abs(st.sx-hx)<U*0.6)){
+      if(holeXs.some(hx=>Math.abs(st.sx-hx)<U*0.35)){
         covered.add(Math.round(st.sx));
       }
     }
@@ -1164,11 +1175,6 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',()=>{
   _dragCandidate=null;
   if(!dragBrick) return;
-  if(preDragSnapshot){
-    const i=bricks.indexOf(dragBrick),cur=snapshot();
-    if(cur[i].tx!==preDragSnapshot[i].tx||cur[i].ty!==preDragSnapshot[i].ty) undoStack.push(preDragSnapshot);
-    preDragSnapshot=null;
-  }
   const finalSnap=_lastSnap;
   _lastSnap=null;
   if(finalSnap){
@@ -1178,6 +1184,41 @@ window.addEventListener('mouseup',()=>{
   const snappedTarget=finalSnap?finalSnap.target:null;
   snapTarget=null;canvas.classList.remove('dragging');
   if(!snappedTarget) snapToGrid();
+
+  // ── Overlap check: if brick lands on top of another, return to pre-drag position ──
+  const hw=dragBrick.rotated?BH/2:brickW(dragBrick.size)/2, hh=BH/2;
+  const overlapping=bricks.some(b=>{
+    if(b===dragBrick) return false;
+    const bw=b.rotated?BH/2:brickW(b.size)/2,bh=BH/2;
+    const xOver=Math.abs(dragBrick.tx-b.tx)<(hw+bw)*0.85;
+    const yOver=Math.abs(dragBrick.ty-b.ty)<(hh+bh)*0.85;
+    return xOver&&yOver;
+  });
+
+  if(overlapping&&preDragSnapshot){
+    // Restore to pre-drag position
+    const idx=bricks.indexOf(dragBrick);
+    if(idx>=0&&preDragSnapshot[idx]){
+      dragBrick.tx=dragBrick.x=preDragSnapshot[idx].tx;
+      dragBrick.ty=dragBrick.y=preDragSnapshot[idx].ty;
+      dragBrick.layer=preDragSnapshot[idx].layer||0;
+    }
+    preDragSnapshot=null;
+    // Flash hint message
+    const hint=document.getElementById('status-hint');
+    const prev=hint.textContent;
+    hint.textContent='bricks can\'t overlap — returned to original position';
+    hint.style.color='#888';
+    setTimeout(()=>{hint.textContent=prev;},2000);
+    dragBrick=null;_bgCache=null;renderFrame();updateUndoButton();
+    return;
+  }
+
+  if(preDragSnapshot){
+    const i=bricks.indexOf(dragBrick),cur=snapshot();
+    if(cur[i].tx!==preDragSnapshot[i].tx||cur[i].ty!==preDragSnapshot[i].ty) undoStack.push(preDragSnapshot);
+    preDragSnapshot=null;
+  }
   dragBrick.layer=snappedTarget?(snappedTarget.layer||0)+1:computeLayerAtPosition(dragBrick.tx,dragBrick.ty,dragBrick.view,dragBrick.rotated,dragBrick.size);
   dragBrick=null;_bgCache=null;renderFrame();updateUndoButton();
   if(animId){cancelAnimationFrame(animId);animId=null;}
@@ -1205,6 +1246,58 @@ canvas.addEventListener('dblclick',e=>{
     }
   }
 });
+
+// ── Right-click context menu ──
+(function(){
+  const menu=document.getElementById('brick-ctx-menu');
+  let ctxBrick=null,ctxOX=0,ctxOY=0;
+
+  function closeCtx(){menu.classList.remove('visible');ctxBrick=null;}
+
+  canvas.addEventListener('contextmenu',e=>{
+    e.preventDefault();
+    if(phase!=='holding') return;
+    const{ox,oy}=canvasXY(e);
+    for(let i=bricks.length-1;i>=0;i--){
+      const b=bricks[i];
+      if(hitTest(ox,oy,b.tx,b.ty,b.view,b.rotated,b.size)){
+        ctxBrick=b; ctxOX=ox; ctxOY=oy;
+        // Position near cursor, keep within viewport
+        const vw=window.innerWidth,vh=window.innerHeight;
+        const mw=130,mh=72;
+        const left=Math.min(e.clientX+2,vw-mw-8);
+        const top=Math.min(e.clientY+2,vh-mh-8);
+        menu.style.left=left+'px';
+        menu.style.top=top+'px';
+        menu.classList.add('visible');
+        return;
+      }
+    }
+    closeCtx();
+  });
+
+  document.getElementById('ctx-rotate').addEventListener('click',()=>{
+    if(!ctxBrick) return;
+    undoStack.push(snapshot());
+    ctxBrick.rotated=!ctxBrick.rotated;
+    renderFrame(); updateUndoButton();
+    closeCtx();
+  });
+
+  document.getElementById('ctx-customize').addEventListener('click',()=>{
+    if(!ctxBrick) return;
+    openCustomPanel(ctxBrick,ctxOX,ctxOY);
+    closeCtx();
+  });
+
+  // Close on any click outside
+  document.addEventListener('click',e=>{
+    if(!menu.contains(e.target)) closeCtx();
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape') closeCtx();
+  });
+})();
 
 function canvasXY(e){const r=canvas.getBoundingClientRect();return{ox:e.clientX-r.left,oy:e.clientY-r.top};}
 function hitTest(mx,my,bx,by,view,rotated,size){return getSDF(mx,my,bx,by,view,rotated,size)<=2;}
@@ -1320,9 +1413,10 @@ function saveClean(){
       let df=dc;
       for(const st of visStuds){const sdx=Math.abs(px+.5-st.sx)-st.hw,sdy=Math.abs(py+.5-st.sy)-st.hh;df=Math.min(df,Math.min(Math.max(sdx,sdy),0)+Math.sqrt(Math.max(sdx,0)**2+Math.max(sdy,0)**2));}
       const i=(py*W+px)*4;
+      const alreadyDark=buf[i]<128;
       if(brickStyle==='outline'||brickStyle==='dashed'){
-        if(dc<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(dc>-strokeW)buf[i]=buf[i+1]=buf[i+2]=20;}
-        else if(df<=0){buf[i]=buf[i+1]=buf[i+2]=255;
+        if(dc<=0){if(!alreadyDark)buf[i]=buf[i+1]=buf[i+2]=255;if(dc>-strokeW)buf[i]=buf[i+1]=buf[i+2]=20;}
+        else if(df<=0){if(!alreadyDark)buf[i]=buf[i+1]=buf[i+2]=255;
           for(const st of visStuds){
             const dx=px+.5-st.sx,dy=py+.5-st.sy;
             if(brickStyle==='outline'){const dist=Math.sqrt((dx*dx)/(st.hw*st.hw)+(dy*dy)/(st.hh*st.hh));if(dist<=1&&dist>1-strokeW/Math.min(st.hw,st.hh)){buf[i]=buf[i+1]=buf[i+2]=20;break;}}
@@ -1330,7 +1424,7 @@ function saveClean(){
           }
         }
       } else {
-        if(dc<=0){buf[i]=buf[i+1]=buf[i+2]=255;if(df<=0&&(Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=20;}
+        if(dc<=0){if(!alreadyDark)buf[i]=buf[i+1]=buf[i+2]=255;if(df<=0&&(Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=20;}
         else if(df<=0){let t=-1;for(const st of visStuds){const nx=(px+.5-st.sx)/st.hw,ny=(py+.5-st.sy)/st.hh,e=nx*nx+ny*ny;if(e<=1){t=Math.max(0,1-e);break;}}
           if(t>=0)buf[i]=buf[i+1]=buf[i+2]=Math.min(255,Math.round(20+t*42));
           else if((Math.abs(df)%iv)<rw)buf[i]=buf[i+1]=buf[i+2]=20;
@@ -1438,7 +1532,7 @@ function setStatus(s){
   if(s==='holding'){dot.classList.add('active');text.textContent='holding';
     if(hint&&viewMode==='2d'){
       if(currentComp&&currentComp.name==='Alphabet') hint.textContent='← → to change letter · 3D to view · click brick to annotate · S to save';
-      else hint.textContent=currentPersp&&currentPersp.name==='Top View'?'Top view: flat bricks (no studs) · Next for other angles':'drag · dbl-click=rotate · shift+dbl-click=customize';
+      else hint.textContent='drag · dbl-click=rotate · right-click=more';
     }}
   if(s==='condensing'){dot.classList.add('active');text.textContent='assembling';}
   if(s==='dissolving'){dot.classList.add('dissolving');text.textContent='dissolving';}
@@ -1831,7 +1925,7 @@ document.getElementById('view-angles').addEventListener('click',e=>{
 //  ORIGINAL SDF HELPERS (for built-in renderer)
 // ════════════════════════════════════════════════════════════
 function getSDF(px,py,bx,by,view,rotated,size){if(view==='side')return sdfSide(px,py,bx,by,size);if(view==='top')return sdfTop(px,py,bx,by,size);return sdfFront(px,py,bx,by,rotated,size);}
-function getStudCenters(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return[{sx:bx,sy:by-BH/2-SH/2,hw:SW/2,hh:SH/2}];if(view==='top')return[];const n=size||4,studY=by-BH/2-SH/2,studs=[];for(let i=0;i<n;i++)studs.push(bx-w/2+U*(i+.5));return studs.map(sx=>({sx,sy:studY,hw:SW/2,hh:SH/2}));}
+function getStudCenters(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return[{sx:bx,sy:by-BH/2-SH/2,hw:BH*0.28,hh:SH/2}];if(view==='top')return[];const n=size||4,studY=by-BH/2-SH/2,studs=[];for(let i=0;i<n;i++)studs.push(bx-w/2+U*(i+.5));return studs.map(sx=>({sx,sy:studY,hw:SW/2,hh:SH/2}));}
 function getStudGradient(px,py,bx,by,view,rotated,size){const studs=getStudCenters(bx,by,view,rotated,size);for(const{sx,sy,hw,hh}of studs){const nx=(px-sx)/hw,ny=(py-sy)/hh,e=nx*nx+ny*ny;if(e<=1)return Math.max(0,1-e);}return -1;}
 function sdfBody(px,py,bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return sdBox(px,py,bx,by,BH/2,BH/2,BR);if(view==='top')return sdBox(px,py,bx,by,w/2,BH*.22,BR);return sdBox(px,py,bx,by,w/2,BH/2,BR);}
 function getBounds(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return{x0:bx-BH/2-2,x1:bx+BH/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};if(view==='top')return{x0:bx-w/2-2,x1:bx+w/2+2,y0:by-BH*.25-2,y1:by+BH*.25+2};return{x0:bx-w/2-SW/2-2,x1:bx+w/2+SW/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};}
@@ -1844,8 +1938,8 @@ function sdBox(px,py,cx,cy,hw,hh,r){r=r||0;const qx=Math.abs(px-cx)-hw+r,qy=Math
 //  PROJECTIONS
 // ════════════════════════════════════════════════════════════
 function projFront(bs,cx,cy){return bs.map(b=>({x:b.x,y:b.y,view:'front'}));}
-function projSide(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*(BH/BW),y:cy+(b.y-mcy),view:'side'}));}
-function projTop(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx),y:cy+(b.y-mcy)*.4,view:'top'}));}
+function projSide(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*(BH/BW),y:cy+(b.y-mcy),view:'front'}));}
+function projTop(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx),y:cy+(b.y-mcy)*.4,view:'front'}));}
 function projIso(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>{const dx=b.x-mcx,dy=b.y-mcy;return{x:cx+(dx-dy*.3)*.75,y:cy+(dx*.25+dy*.5)*.75,view:'front'};});}
 function projCloseup(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*2.5,y:cy+(b.y-mcy)*2.5,view:'front'}));}
 function projExploded(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*1.8,y:cy+(b.y-mcy)*1.8,view:'front'}));}
