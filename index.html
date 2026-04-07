@@ -13,6 +13,15 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 #topbar .meta { font-size:10px; letter-spacing:.13em; color:#bbb; text-transform:uppercase; display:flex; gap:6px; align-items:center; flex-shrink:0; white-space:nowrap; }
 #topbar .meta span { color:#222; }
 #topbar .meta .sep { color:#e0e0e0; }
+#topbar .meta button.meta-link {
+  font-family:inherit; font-size:inherit; letter-spacing:inherit; text-transform:inherit;
+  color:#222; background:transparent; border:none; padding:0; margin:0; line-height:inherit;
+  cursor:default; pointer-events:none;
+}
+#topbar .meta button.meta-link.is-active {
+  cursor:pointer; pointer-events:auto; border-bottom:1px dotted #bbb;
+}
+#topbar .meta button.meta-link.is-active:hover { border-bottom-color:#222; color:#000; }
 #topbar .actions { display:flex; gap:6px; align-items:center; flex:1; justify-content:flex-end; }
 #topbar .btn-group { display:flex; gap:0; }
 #topbar .btn-group .btn { border-right-width:0; }
@@ -33,11 +42,12 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 .menu-pop .btn:last-child { border-bottom:none; }
 
 /* ── Custom panel ── */
-#custom-panel { display:none; position:absolute; z-index:100; background:#fff; border:1px solid #222; padding:16px; width:268px; box-shadow:2px 2px 0 rgba(0,0,0,.08); }
+#custom-panel { display:none; position:absolute; z-index:100; background:#fff; border:1px solid #222; padding:16px; width:288px; box-shadow:2px 2px 0 rgba(0,0,0,.08); }
 #custom-panel.visible { display:block; }
 #custom-panel h3 { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#999; margin-bottom:12px; cursor:grab; user-select:none; }
 .panel-section { margin-bottom:12px; }
 .panel-section label { display:block; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#aaa; margin-bottom:6px; }
+.panel-section .panel-microhint { font-size:8px; letter-spacing:.04em; text-transform:none; color:#bbb; line-height:1.35; margin:-2px 0 8px; font-weight:400; }
 .ctrl-row { display:grid; grid-template-columns:58px 1fr 44px; align-items:center; gap:8px; margin-bottom:6px; }
 .ctrl-row .k { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:#999; }
 .ctrl-row .v { font-size:9px; color:#888; text-align:right; font-variant-numeric:tabular-nums; }
@@ -190,7 +200,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
   <div class="meta">
     <span id="label-a">—</span>
     <span class="sep">·</span>
-    <span id="label-c">—</span>
+    <button type="button" id="label-c" class="meta-link" aria-live="polite">—</button>
     <span class="sep">·</span>
     <span id="label-count">—</span>
   </div>
@@ -200,13 +210,14 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
       <button class="btn" id="btn-random">Random</button>
       <button class="btn" id="btn-letters">Alphabet</button>
       <button class="btn" id="btn-type">Type</button>
-    </div>
+      <button class="btn" id="btn-imported" type="button" title="Blank 2D canvas — import from Library or add bricks">Imported</button>
+  </div>
     <div class="divider"></div>
     <!-- View group -->
     <div class="btn-group">
       <button class="btn primary" id="btn-view-2d">2D</button>
       <button class="btn" id="btn-view-3d">3D</button>
-    </div>
+</div>
     <button class="btn" id="btn-3d-mode" style="display:none" title="Switch between flat (2D-matched) and stack (layered) 3D layout">Flat</button>
     <button class="btn" id="btn-auto-rotate" style="display:none">Auto</button>
     <div class="divider"></div>
@@ -225,7 +236,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <button class="btn" id="btn-undo" disabled>Undo</button>
     <button class="btn" id="btn-reset" disabled>Reset</button>
     <button class="btn" id="btn-next">Next</button>
-    <button class="btn primary" id="btn-save">Save</button>
+    <button class="btn" id="btn-save">Save</button>
     <button class="btn" id="btn-share-submit" type="button" disabled title="Configure brick-config.local.js">Share</button>
     <button class="btn" id="btn-library-toggle" type="button" title="Show or hide Library" aria-expanded="false" aria-controls="library-panel">Library</button>
     <button type="button" class="btn-info" id="btn-info" title="Help &amp; shortcuts (?)" aria-label="Help">?</button>
@@ -244,7 +255,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
       <button data-angle="side">Side</button>
       <button data-angle="top">Top</button>
       <button data-angle="iso">Iso</button>
-    </div>
+</div>
   </div>
   <div id="brick-ctx-menu">
     <button id="ctx-rotate">Rotate</button>
@@ -258,11 +269,13 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <button class="close-x" id="panel-close">✕</button>
     <h3>Customize Brick</h3>
     <div class="panel-section">
-      <label>Transform</label>
+      <label>Block shape</label>
+      <p class="panel-microhint">Normal brick look or extra 3D / distortion (hover a button for detail).</p>
       <div class="pill-group" id="tx-pills"></div>
     </div>
     <div class="panel-section">
-      <label>Drawing Method</label>
+      <label>Fill pattern</label>
+      <p class="panel-microhint">How lines, dots, or texture cover the brick face.</p>
       <div class="pill-group" id="method-pills"></div>
     </div>
     <div class="panel-section" id="param-controls">
@@ -320,7 +333,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <h2>Brick System</h2>
     <h3>Modes</h3>
     <div class="info-row"><span class="info-key"><kbd>Random</kbd></span><span class="info-desc">Random brick compositions</span></div>
-    <div class="info-row"><span class="info-key"><kbd>Alphabet</kbd></span><span class="info-desc">Browse A–Z letters built from bricks</span></div>
+    <div class="info-row"><span class="info-key"><kbd>Alphabet</kbd></span><span class="info-desc">Browse A–Z letters built from bricks · click the perspective name in the top bar (e.g. Front View) to cycle Side / Top / Isometric / …</span></div>
     <div class="info-row"><span class="info-key"><kbd>Type</kbd></span><span class="info-desc">Type a word and build it from bricks</span></div>
     <h3>Navigation</h3>
     <div class="info-row"><span class="info-key"><kbd>Space</kbd></span><span class="info-desc">Next composition / re-render</span></div>
@@ -339,7 +352,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <div class="info-row"><span class="info-key"><kbd>Share</kbd></span><span class="info-desc">Submit layout to Supabase gallery (when configured)</span></div>
     <h3>Shared gallery (Supabase)</h3>
     <div class="info-row"><span class="info-key">Setup</span><span class="info-desc">Run <kbd>supabase-schema.sql</kbd> · set <kbd>brick-config.js</kbd> on your host (or use gitignored <kbd>brick-config.local.js</kbd> locally)</span></div>
-    <div class="info-row"><span class="info-key">Library</span><span class="info-desc"><kbd>View</kbd> = 2D preview · <kbd>Import</kbd> restores bricks + mode (Alphabet / Word / composition name + perspective) when the item was shared from a recent build</span></div>
+    <div class="info-row"><span class="info-key">Library</span><span class="info-desc"><kbd>View</kbd> = 2D preview · <kbd>Import</kbd> loads bricks into Imported mode (not Random / Alphabet / Type); saved composition name · perspective appears in the top bar when present</span></div>
     <h3>3D Mode</h3>
     <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Orbit camera</span></div>
     <div class="info-row"><span class="info-key">Scroll</span><span class="info-desc">Zoom in / out</span></div>
@@ -375,9 +388,30 @@ const COVERED_STUD_Y_TOL=Math.max(10,BSTK*0.22);
 // ── sketch4 base unit ──
 const BASE_U = 16;
 
-// ── All transforms + methods ──
-const ALL_TX  = ['Front','Isometric','Stretch','Melt','Explode','Shadow','Unfold'];
-const ALL_MTH = ['Concentric','Dots','H-Lines','Diagonal','Cross-Hatch','Stipple','Pixel Grid','Radial','Wave','Noise'];
+// ── All transforms + methods (id = stored in customStyle; label = panel UI) ──
+const TRANSFORM_OPTIONS=[
+  { id:'Front',      label:'Standard front', title:'Normal flat brick — one face, four studs.'},
+  { id:'Isometric',  label:'Three faces',    title:'Mini 3D: top + front + side (isometric block).'},
+  { id:'Stretch',    label:'Stretch',      title:'Widen or squash the brick body.'},
+  { id:'Melt',       label:'Melt',         title:'Soft, rounded silhouette.'},
+  { id:'Explode',    label:'Explode',      title:'Studs pushed away from the body.'},
+  { id:'Shadow',     label:'+ Shadow',     title:'Same brick with a drop shadow on the “ground”.'},
+  { id:'Unfold',     label:'Unfold',       title:'Studs splay outward like hinges.'},
+];
+const METHOD_OPTIONS=[
+  { id:'Concentric',  label:'Rings',         title:'Concentric oval / ring lines.'},
+  { id:'Dots',        label:'Dots',          title:'Regular grid of dots.'},
+  { id:'H-Lines',     label:'H stripes',     title:'Horizontal line fill.'},
+  { id:'Diagonal',    label:'Diagonal',      title:'Slanted line fill.'},
+  { id:'Cross-Hatch', label:'Cross hatch',   title:'Two diagonal directions crossed.'},
+  { id:'Stipple',     label:'Fine stipple',  title:'Dense tiny dots / speckle.'},
+  { id:'Pixel Grid',  label:'Pixel blocks',  title:'Chunky pixel mosaic.'},
+  { id:'Radial',      label:'Sunburst',      title:'Straight rays from a center point.'},
+  { id:'Wave',        label:'Waves',         title:'Wavy flowing lines.'},
+  { id:'Noise',       label:'Grain',         title:'Soft random noise texture.'},
+];
+const ALL_TX =TRANSFORM_OPTIONS.map(o=>o.id);
+const ALL_MTH=METHOD_OPTIONS.map(o=>o.id);
 
 // ── Style presets ──
 const STYLE_PRESETS = [
@@ -433,6 +467,7 @@ let _dragOrigin=null;
 let savedOriginalLayout=null, undoStack=[], preDragSnapshot=null;
 let currentWord='';
 let typeMode=false, viewMode='2d';
+let _librarySourceSnapshot=null; // optional metadata from shared JSON for Share + labels (Imported mode)
 let layout3dMode='flat'; // 'flat' | 'stack'
 let _pendingView3dRestore=null; // applied next time user enters 3D (after Library import)
 let brickPosTweens=[]; // per-brick position animations
@@ -526,8 +561,12 @@ function getSDF4(px,py,bx,by,sc,p,vm,ex){
     return d;
   }
   if(vm==='top_shape'){
-    // Flat top silhouette
-    return sdBox4(px,py,bx,by,bw/2,bh*.22,u*.06);
+    const hd=u*.5;
+    let d=sdBox4(px,py,bx,by,bw/2,hd,u*.06);
+    const spr=u*.04;
+    for(const sx of[bx-u*1.5,bx-u*.5,bx+u*.5,bx+u*1.5])
+      d=Math.min(d,sdBox4(px,py,sx,by,sw/2,sw/2,spr));
+    return d;
   }
   let d=sdBox4(px,py,bx,by,bw/2,bh/2,u*.06);
   const top=by-bh/2;
@@ -545,7 +584,7 @@ function getBounds4(bx,by,sc,p,vm,ex){
   if(vm==='body_only') return{x0:bx-bw/2-pad,x1:bx+bw/2+pad,y0:by-bh/2-pad,y1:by+bh/2+pad};
   if(vm==='stud_only') return{x0:bx-sw/2-pad,x1:bx+sw/2+pad,y0:by-esh/2-pad,y1:by+esh/2+pad};
   if(vm==='side_shape') return{x0:bx-bh/2-pad,x1:bx+bh/2+pad,y0:by-bh/2-esh-pad,y1:by+bh/2+pad};
-  if(vm==='top_shape') return{x0:bx-bw/2-pad,x1:bx+bw/2+pad,y0:by-bh*.25-pad,y1:by+bh*.25+pad};
+  if(vm==='top_shape') return{x0:bx-bw/2-sw/2-pad,x1:bx+bw/2+sw/2+pad,y0:by-u*.5-sw/2-pad,y1:by+u*.5+sw/2+pad};
   return{x0:bx-bw/2-sw/2-pad,x1:bx+bw/2+sw/2+pad,y0:by-bh/2-esh-pad,y1:by+bh/2+pad};
 }
 
@@ -687,14 +726,14 @@ function renderCustomBrick(ctx2,bx,by,cs,sc,view,rotated,size){
   // Compute actual physical dimensions matching the original brick renderer:
   //   front: 4-stud wide (BW=u*4), BH tall, 4 studs
   //   side/rotated: square (BH x BH), 1 stud
-  //   top: flat wide (BW x BH*0.44), no studs
+  //   top: flat plate (shallow actualH) + studs in top_shape
   const isSide = rotated || view==='side';
   const isTop  = (!rotated) && view==='top';
   const n = isSide ? 1 : (size||4);              // actual stud count
   const actualW = isSide ? u*1.2 : u*n;          // matches original brickW(size)
   const actualH = isTop  ? u*1.2*0.44 : u*1.2;
-  // stud X offsets centered on bx, spaced u apart
-  const studXs  = isSide ? [0] : isTop ? [] : Array.from({length:n},(_,i)=>(-n/2+i+0.5)*u);
+  // stud offsets along plate length (front elevation on top edge; top/bird’s-eye on plate centerline)
+  const studXs  = isSide ? [0] : Array.from({length:n},(_,i)=>(-n/2+i+0.5)*u);
   const sw=u*.56, sh=u*.35;
 
   if(tx==='Isometric'){
@@ -730,8 +769,8 @@ function renderCustomBrick(ctx2,bx,by,cs,sc,view,rotated,size){
     });
     return;
   }
-  // Front/default
-  drawCustom2DWithDims(ctx2,bx,by,mn,p,'front',dims);
+  const baseVm=view==='top'?'top_shape':'front';
+  drawCustom2DWithDims(ctx2,bx,by,mn,p,baseVm,dims);
 }
 
 // Dimension-aware 2D brick drawer — uses actual brick dims instead of hardcoded BASE_U*4
@@ -744,6 +783,10 @@ function drawCustom2DWithDims(ctx2,bx,by,mn,p,vm,dims,ex){
   if(vm==='shadow'){x0=bx-actualW/2-pad;x1=bx+actualW/2+pad;y0=by-actualH*.3-pad;y1=by+actualH*.3+pad;}
   else if(vm==='body_only'){x0=bx-actualW/2-pad;x1=bx+actualW/2+pad;y0=by-actualH/2-pad;y1=by+actualH/2+pad;}
   else if(vm==='stud_only'){x0=bx-sw/2-pad;x1=bx+sw/2+pad;y0=by-sh/2-pad;y1=by+sh/2+pad;}
+  else if(vm==='top_shape'){
+    const hd=u*.5;
+    x0=bx-actualW/2-sw/2-pad;x1=bx+actualW/2+sw/2+pad;y0=by-hd-sw/2-pad;y1=by+hd+sw/2+pad;
+  }
   else if(vm==='stretch'){
     const sx=ex?ex.stretchX:1,sy=ex?ex.stretchY:1;
     x0=bx-actualW*sx/2-sw-pad;x1=bx+actualW*sx/2+sw+pad;y0=by-actualH*sy/2-sh-pad;y1=by+actualH*sy/2+pad;
@@ -792,6 +835,15 @@ function sdfCustomDims(px,py,bx,by,vm,dims,ex){
     for(const sx of studXs){
       const absx=sx===0?bx:bx+sx*sxf;
       d=Math.min(d,sdBox4(px,py,absx,top-sh*syf/2,sw*sxf/2,sh*syf/2,sr));
+    }
+    return d;
+  }
+  if(vm==='top_shape'){
+    const hd=u*.5;
+    let d=sdBox4(px,py,bx,by,actualW/2,hd,r);
+    for(const sx of studXs){
+      const absx=sx===0?bx:bx+sx;
+      d=Math.min(d,sdBox4(px,py,absx,by,sw/2,sw/2,sr));
     }
     return d;
   }
@@ -885,13 +937,33 @@ function triggerNext(){
 function triggerAlphabetLetter(idx){
   currentLetterIndex=(idx+26)%26;
   currentComp=CARD_A.find(c=>c.name==='Alphabet');
-  if(!currentPersp||currentPersp.name!=='Front View') currentPersp=CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
+  if(!currentPersp) currentPersp=CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
   clearAnnotations();
   applyCompAndStart();
 }
 
+function cycleAlphabetPerspective(){
+  if(!currentComp||currentComp.name!=='Alphabet'||phase!=='holding') return;
+  const nm=currentPersp&&currentPersp.name;
+  const ix=nm?CARD_C.findIndex(c=>c.name===nm):0;
+  const i=ix>=0?ix:0;
+  currentPersp=CARD_C[(i+1)%CARD_C.length];
+  clearAnnotations();
+  applyCompAndStart();
+}
+
+function refreshLabelCPerspectiveClickable(){
+  const lc=document.getElementById('label-c');
+  if(!lc) return;
+  const on=currentComp&&currentComp.name==='Alphabet'&&phase==='holding';
+  lc.classList.toggle('is-active',on);
+  if(on) lc.setAttribute('title','Cycle: Front → Side → Top → Isometric → Close-up → Exploded');
+  else lc.removeAttribute('title');
+}
+
 function applyCompAndStart(){
   if(typeMode) exitTypeMode();
+  clearImportedLayoutModeUi();
   closeCustomPanel();
   clearSelection();
   clearAnnotations();
@@ -923,6 +995,7 @@ function applyCompAndStart(){
 
   document.getElementById('btn-random').classList.toggle('active',currentComp.name!=='Alphabet'&&currentComp.name!=='Word');
   document.getElementById('btn-letters').classList.toggle('active',currentComp.name==='Alphabet');
+  document.getElementById('btn-imported')?.classList.remove('active');
   document.getElementById('alphabet-panel').classList.toggle('visible',currentComp.name==='Alphabet');
   syncLibraryPanelLayout();
   updateAlphabetPanelActive();
@@ -964,6 +1037,13 @@ function unpackLayoutJson(raw){
   return null;
 }
 function buildSourceMeta(){
+  if(currentComp&&currentComp.name==='Imported'){
+    if(_librarySourceSnapshot&&_librarySourceSnapshot.compName){
+      const o={..._librarySourceSnapshot};
+      return o;
+    }
+    return{ compName:'Library' };
+  }
   if(!currentComp||!currentComp.name) return null;
   const out={ compName:currentComp.name };
   if(currentPersp&&currentPersp.name) out.perspName=currentPersp.name;
@@ -985,66 +1065,116 @@ function packLayoutForShare(){
   }
   return out;
 }
-/** After Library import: match top bar + mode buttons to saved composition (or generic Library labels). */
+function openLibraryPanel(){
+  const btn=document.getElementById('btn-library-toggle');
+  const panel=document.getElementById('library-panel');
+  if(!btn||!panel) return;
+  if(!panel.classList.contains('library-panel--open')){
+    panel.classList.add('library-panel--open');
+    btn.classList.add('active');
+    btn.setAttribute('aria-expanded','true');
+    panel.setAttribute('aria-hidden','false');
+    syncLibraryPanelLayout();
+  }
+  loadLibrary();
+}
+function closeLibraryPanel(){
+  const btn=document.getElementById('btn-library-toggle');
+  const panel=document.getElementById('library-panel');
+  if(!btn||!panel||!panel.classList.contains('library-panel--open')) return;
+  panel.classList.remove('library-panel--open');
+  btn.classList.remove('active');
+  btn.setAttribute('aria-expanded','false');
+  panel.setAttribute('aria-hidden','true');
+  syncLibraryPanelLayout();
+}
+/** 2D white board only: no bricks, annotations, 3D meshes, custom panel, Alphabet/Type chrome. */
+function prepareImportedBlankWorkboard(){
+  if(phase==='dissolving'||phase==='condensing') return false;
+  if(viewMode==='3d') setViewMode('2d');
+  else if(typeMode) exitTypeMode();
+  if(animId){ cancelAnimationFrame(animId); animId=null; }
+  _pendingView3dRestore=null;
+  closeCustomPanel(true);
+  clearSelection();
+  clearAnnotations();
+  bricks=[];
+  phase='holding';
+  unhighlight3d();
+  if(bricksGroup3d){ while(bricksGroup3d.children.length) bricksGroup3d.remove(bricksGroup3d.children[0]); }
+  resizeCanvas();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  _librarySourceSnapshot=null;
+  savedOriginalLayout=null;
+  undoStack=[];
+  updateUndoButton();
+  const br=document.getElementById('btn-reset');
+  if(br) br.disabled=true;
+  return true;
+}
+function applyImportedEmptyBundleUi(){
+  currentComp={ name:'Imported', fn(){ return []; } };
+  currentPersp=CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
+  document.getElementById('label-a').textContent='Imported';
+  document.getElementById('label-c').textContent='Library';
+  document.getElementById('label-count').textContent='0 bricks';
+  document.getElementById('btn-random').classList.remove('active');
+  document.getElementById('btn-letters').classList.remove('active');
+  document.getElementById('btn-type').classList.remove('active');
+  document.getElementById('btn-imported').classList.add('active');
+  document.getElementById('alphabet-panel').classList.remove('visible');
+  document.getElementById('type-bar')?.classList.remove('visible');
+  syncLibraryPanelLayout();
+  if(typeof refreshShareSubmitUi==='function') refreshShareSubmitUi();
+  setStatus('holding');
+  renderFrame();
+}
+/** After Library import: dedicated “Imported” content mode (not Random / Alphabet / Type). */
 function applyImportedSourceToUi(src){
   const la=document.getElementById('label-a');
   const lc=document.getElementById('label-c');
   const ln=document.getElementById('label-count');
   const br=document.getElementById('btn-random');
   const bl=document.getElementById('btn-letters');
+  const bt=document.getElementById('btn-type');
+  const bi=document.getElementById('btn-imported');
   const ap=document.getElementById('alphabet-panel');
   if(!la||!lc||!ln) return;
-  if(!src||!src.compName){
-    la.textContent='Library';
-    lc.textContent='Imported';
-    ln.textContent=String(bricks.length)+' bricks';
-    if(br) br.classList.add('active');
-    if(bl) bl.classList.remove('active');
-    if(ap) ap.classList.remove('visible');
-    syncLibraryPanelLayout();
-    if(typeof refreshShareSubmitUi==='function') refreshShareSubmitUi();
-    return;
-  }
-  const name=src.compName;
-  if(name==='Alphabet'){
-    currentComp=CARD_A.find(c=>c.name==='Alphabet')||CARD_A[0];
-    if(typeof src.letterIndex==='number') currentLetterIndex=Math.max(0,Math.min(25,Math.floor(src.letterIndex)));
-    currentPersp=CARD_C.find(c=>c.name===src.perspName)||CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
-  } else if(name==='Word'){
-    currentComp=CARD_A.find(c=>c.name==='Word');
-    if(!currentComp) currentComp={name:'Word',fn:compWord};
-    if(src.word) currentWord=String(src.word);
+  if(typeMode) exitTypeMode();
+  _librarySourceSnapshot=src&&typeof src==='object'?{...src}:null;
+  currentComp={name:'Imported',fn(){ return []; }};
+  if(src&&src.perspName){
     currentPersp=CARD_C.find(c=>c.name===src.perspName)||CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
   } else {
-    const comp=CARD_A.find(c=>c.name===name);
-    if(!comp){
-      la.textContent='Library';
-      lc.textContent='Imported';
-      ln.textContent=String(bricks.length)+' bricks';
-      if(br) br.classList.add('active');
-      if(bl) bl.classList.remove('active');
-      if(ap) ap.classList.remove('visible');
-      syncLibraryPanelLayout();
-      if(typeof refreshShareSubmitUi==='function') refreshShareSubmitUi();
-      return;
-    }
-    currentComp=comp;
-    currentPersp=CARD_C.find(c=>c.name===src.perspName)||CARD_C[0];
-    if(typeof src.resultCount==='number'&&Number.isFinite(src.resultCount)) resultCount=src.resultCount;
+    currentPersp=CARD_C.find(c=>c.name==='Front View')||CARD_C[0];
   }
-  la.textContent=currentComp.name;
-  lc.textContent=currentPersp?currentPersp.name:'—';
-  ln.textContent=currentComp.name==='Alphabet'?(currentLetterIndex+1)+'/26 '+LETTERS[currentLetterIndex]:
-    currentComp.name==='Word'?(currentWord||'—'):
-    '#'+String((src&&src.resultCount!=null)?src.resultCount:bricks.length).padStart(3,'0');
-  const isA=currentComp.name==='Alphabet';
-  const isW=currentComp.name==='Word';
-  if(br) br.classList.toggle('active',!isA&&!isW);
-  if(bl) bl.classList.toggle('active',isA);
-  if(ap) ap.classList.toggle('visible',isA);
+  la.textContent='Imported';
+  if(src&&src.compName&&src.perspName) lc.textContent=src.compName+' · '+src.perspName;
+  else if(src&&src.compName) lc.textContent=src.compName;
+  else lc.textContent='Library';
+  ln.textContent=String(bricks.length)+' bricks';
+  if(br) br.classList.remove('active');
+  if(bl) bl.classList.remove('active');
+  if(bt) bt.classList.remove('active');
+  if(bi) bi.classList.add('active');
+  if(ap) ap.classList.remove('visible');
   syncLibraryPanelLayout();
-  if(isA&&typeof updateAlphabetPanelActive==='function') updateAlphabetPanelActive();
   if(typeof refreshShareSubmitUi==='function') refreshShareSubmitUi();
+  openLibraryPanel();
+}
+function clearImportedLayoutModeUi(){
+  _librarySourceSnapshot=null;
+  document.getElementById('btn-imported')?.classList.remove('active');
+  closeLibraryPanel();
+}
+/** Imported + Library bundle: blank workboard (UI only) until import or Add Brick. */
+function enterImportedModeBlank(){
+  if(!prepareImportedBlankWorkboard()) return;
+  applyImportedEmptyBundleUi();
+  document.getElementById('status-hint').textContent='Blank canvas · Library to import · Add Brick to start';
+  openLibraryPanel();
 }
 function applySnapshot(snap){
   if(!snap||snap.length!==bricks.length) return;
@@ -1158,19 +1288,26 @@ function layoutJsonToBrickObjects(layout){
     };
   });
 }
-/** Restore layout from a Supabase row’s `layout` JSON (array or `{ bricks, view3d?, source? }`). */
-function replaceBricksFromLayout(layout, view3dMeta, sourceMeta){
-  if(!Array.isArray(layout)||!layout.length) return false;
+/** Restore layout from a Supabase row’s `layout` JSON (array or `{ bricks, view3d?, source? }`).
+ *  opts.preparedBricks: already-built brick objects (e.g. layers computed before scaling from gallery). */
+function replaceBricksFromLayout(layout, view3dMeta, sourceMeta, opts){
+  const o=opts||{};
   if(view3dMeta&&view3dMeta.orbit){
     if(viewMode!=='3d'||!bricksGroup3d) _pendingView3dRestore=view3dMeta;
     else _pendingView3dRestore=null;
   } else {
     _pendingView3dRestore=null;
   }
-  bricks=layoutJsonToBrickObjects(layout);
-  recomputeFrontLayersBySupport();
-  if(typeof snapFullEmbedFrontBricks==='function') snapFullEmbedFrontBricks();
-  recomputeFrontLayersBySupport();
+  if(o.preparedBricks){
+    if(!o.preparedBricks.length) return false;
+    bricks=o.preparedBricks;
+  } else {
+    if(!Array.isArray(layout)||!layout.length) return false;
+    bricks=layoutJsonToBrickObjects(layout);
+    recomputeFrontLayersBySupport();
+    if(typeof snapFullEmbedFrontBricks==='function') snapFullEmbedFrontBricks();
+    recomputeFrontLayersBySupport();
+  }
   clearSelection();
   clearAnnotations();
   savedOriginalLayout=null;
@@ -1209,6 +1346,20 @@ function scaleLayoutToCurrentCanvas(layout, fromW, fromH){
     ty:(b.ty-cy)*s+ry
   }));
 }
+/** Like scaleLayoutToCurrentCanvas but mutates live brick objects (tx/ty/x/y/sx/sy) and preserves layers. */
+function scaleLayoutBrickObjectsInPlace(list, fromW, fromH){
+  if(!list||!list.length) return;
+  resizeCanvas();
+  const rw=canvas.width, rh=canvas.height;
+  if(!fromW||!fromH||fromW<=0||fromH<=0) return;
+  if(Math.abs(fromW-rw)<2&&Math.abs(fromH-rh)<2) return;
+  const s=Math.min(rw/fromW, rh/fromH);
+  const cx=fromW/2, cy=fromH/2, rx=rw/2, ry=rh/2;
+  for(const b of list){
+    const tx=(b.tx-cx)*s+rx, ty=(b.ty-cy)*s+ry;
+    b.tx=tx; b.ty=ty; b.x=b.sx=tx; b.y=b.sy=ty;
+  }
+}
 let _libraryPreviewRow=null;
 function recomputeFrontLayersForList(list){
   const front=(list||[]).filter(b=>b.view==='front');
@@ -1216,24 +1367,10 @@ function recomputeFrontLayersForList(list){
   const ordered=front.slice().sort((a,b)=>b.ty-a.ty);
   for(const b of ordered) b.layer=getSupportedLayerAt(b,b.tx,b.ty,list);
 }
-function fitBrickListToViewport(brickList,cw,ch,pad){
-  if(!brickList||!brickList.length) return brickList;
-  const p=pad==null?28:pad;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  for(const b of brickList){
-    const bd=getBounds(b.tx,b.ty,b.view,b.rotated,b.size);
-    minX=Math.min(minX,bd.x0); minY=Math.min(minY,bd.y0);
-    maxX=Math.max(maxX,bd.x1); maxY=Math.max(maxY,bd.y1);
-  }
-  const bw=Math.max(maxX-minX,1), bh=Math.max(maxY-minY,1);
-  const s=Math.min((cw-p*2)/bw,(ch-p*2)/bh);
-  const cx=(minX+maxX)/2, cy=(minY+maxY)/2, tcx=cw/2, tcy=ch/2;
-  return brickList.map(b=>{
-    const tx=(b.tx-cx)*s+tcx, ty=(b.ty-cy)*s+tcy;
-    return{...b, tx, ty, x:tx, y:ty, sx:tx, sy:ty};
-  });
-}
-function paintBrickListToPreviewCanvas(pcvs, brickListOrig){
+/** Library preview: render in share-time pixel space (saved canvas_w × canvas_h).
+ *  Scaling tx/ty to the current main canvas makes stacked spacing s×BSTK while layer/stud
+ *  math still uses BSTK → wrong hierarchy when s≠1. */
+function paintBrickListToPreviewCanvas(pcvs, brickListOrig, savedW, savedH){
   if(!pcvs||!brickListOrig||!brickListOrig.length) return;
   const list=brickListOrig.map(b=>({
     ...b,
@@ -1241,24 +1378,44 @@ function paintBrickListToPreviewCanvas(pcvs, brickListOrig){
     x:b.tx,y:b.ty,sx:b.tx,sy:b.ty
   }));
   recomputeFrontLayersForList(list);
-  const wrap=pcvs.parentElement;
-  let w=Math.max(280,Math.floor((wrap&&wrap.clientWidth)||640));
-  let h=Math.max(200,Math.floor((wrap&&wrap.clientHeight)||420));
-  pcvs.width=w; pcvs.height=h;
-  const fitted=fitBrickListToViewport(list,w,h,28);
-  recomputeFrontLayersForList(fitted);
+  const sw=Number(savedW), sh=Number(savedH);
+  const useSavedViewport=Number.isFinite(sw)&&Number.isFinite(sh)&&sw>0&&sh>0;
+  let w, h, drawList;
+  if(useSavedViewport){
+    w=Math.max(1,Math.ceil(sw));
+    h=Math.max(1,Math.ceil(sh));
+    drawList=list;
+  } else {
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    for(const b of list){
+      const bd=getBounds(b.tx,b.ty,b.view,b.rotated,b.size);
+      minX=Math.min(minX,bd.x0); minY=Math.min(minY,bd.y0);
+      maxX=Math.max(maxX,bd.x1); maxY=Math.max(maxY,bd.y1);
+    }
+    const pad=28;
+    const bw=Math.max(maxX-minX,1), bh=Math.max(maxY-minY,1);
+    w=Math.max(1,Math.ceil(bw+pad*2));
+    h=Math.max(1,Math.ceil(bh+pad*2));
+    const ox=pad-minX, oy=pad-minY;
+    drawList=list.map(b=>({
+      ...b,
+      tx:b.tx+ox, ty:b.ty+oy, x:b.tx+ox, y:b.ty+oy, sx:b.tx+ox, sy:b.ty+oy
+    }));
+  }
+  pcvs.width=w;
+  pcvs.height=h;
   const pctx=pcvs.getContext('2d');
   const buf=new Uint8ClampedArray(w*h*4);
   buf.fill(255);
-  const sorted=fitted.slice().sort((a,b)=>{
+  const sorted=drawList.slice().sort((a,b)=>{
     const ld=(a.layer||0)-(b.layer||0);
     if(ld!==0) return ld;
     return (a.ty||0)-(b.ty||0);
   });
   for(const b of sorted){
     const bx=b.tx, by=b.ty;
-    const covered=getCoveredStudXs(b,bx,by,fitted,true);
-    if(!b.customStyle) renderBrickToBuf(buf,w,h,b,bx,by,20,covered,fitted);
+    const covered=getCoveredStudXs(b,bx,by,drawList,true);
+    if(!b.customStyle) renderBrickToBuf(buf,w,h,b,bx,by,20,covered,drawList);
   }
   const imgData=pctx.createImageData(w,h);
   imgData.data.set(buf);
@@ -1267,10 +1424,10 @@ function paintBrickListToPreviewCanvas(pcvs, brickListOrig){
     if(!b.customStyle) continue;
     const bx=b.tx, by=b.ty;
     const bd=getBounds(bx,by,b.view,b.rotated,b.size);
-    const pad=6;
-    const rx=Math.max(0,Math.floor(bd.x0-pad)),ry=Math.max(0,Math.floor(bd.y0-pad));
-    const rw=Math.min(w-rx,Math.ceil(bd.x1-bd.x0+pad*2+1));
-    const rh=Math.min(h-ry,Math.ceil(bd.y1-bd.y0+pad*2+1));
+    const edgePad=6;
+    const rx=Math.max(0,Math.floor(bd.x0-edgePad)),ry=Math.max(0,Math.floor(bd.y0-edgePad));
+    const rw=Math.min(w-rx,Math.ceil(bd.x1-bd.x0+edgePad*2+1));
+    const rh=Math.min(h-ry,Math.ceil(bd.y1-bd.y0+edgePad*2+1));
     if(rw<=0||rh<=0) continue;
     const off=document.createElement('canvas');off.width=rw;off.height=rh;
     const octx=off.getContext('2d');
@@ -1297,17 +1454,14 @@ function openLibraryPreview(row){
   const u=unpackLayoutJson(layout);
   if(!u||!u.bricks.length) return;
   _libraryPreviewRow=row;
-  resizeCanvas();
-  const raw=layoutJsonToBrickObjects(u.bricks);
-  const list=scaleLayoutToCurrentCanvas(raw, row.canvas_w, row.canvas_h);
-  recomputeFrontLayersForList(list);
+  const list=layoutJsonToBrickObjects(u.bricks);
   const ov=document.getElementById('library-preview-overlay');
   const tit=document.getElementById('library-preview-title');
   if(tit) tit.textContent=(row.title&&String(row.title).trim())?String(row.title).trim():'Untitled';
   if(ov){ ov.classList.add('visible'); ov.setAttribute('aria-hidden','false'); }
   requestAnimationFrame(()=>{
     const pcvs=document.getElementById('library-preview-canvas');
-    if(pcvs) paintBrickListToPreviewCanvas(pcvs, list);
+    if(pcvs) paintBrickListToPreviewCanvas(pcvs, list, row.canvas_w, row.canvas_h);
   });
 }
 function openLibraryImportToMain(row){
@@ -1319,8 +1473,10 @@ function openLibraryImportToMain(row){
   if(typeof layout==='string'){ try{ layout=JSON.parse(layout); }catch(e){ return; } }
   const u=unpackLayoutJson(layout);
   if(!u||!u.bricks.length) return;
-  const scaled=scaleLayoutToCurrentCanvas(u.bricks, row.canvas_w, row.canvas_h);
-  replaceBricksFromLayout(scaled, u.view3d, u.source);
+  const list=layoutJsonToBrickObjects(u.bricks);
+  recomputeFrontLayersForList(list);
+  scaleLayoutBrickObjectsInPlace(list, row.canvas_w, row.canvas_h);
+  replaceBricksFromLayout(null, u.view3d, u.source, { preparedBricks: list });
   closeLibraryPreview();
 }
 function setLibraryListSelection(itemEl){
@@ -1451,15 +1607,23 @@ function renderBrickToBuf(buf,W,H,b,bx,by,col,coveredStudXs,seamBrickList){
     for(let px=x0;px<=x1;px++){
       const db=sdfBody(px+.5,py+.5,bx,by,b.view,b.rotated,b.size);
       let df=db;
-      for(const st of visibleStuds){
-        const sdx=Math.abs(px+.5-st.sx)-st.hw,sdy=Math.abs(py+.5-st.sy)-st.hh;
-        const sd=Math.min(Math.max(sdx,sdy),0)+Math.sqrt(Math.max(sdx,0)**2+Math.max(sdy,0)**2);
-        df=Math.min(df,sd);
-      }
+      for(const st of visibleStuds)
+        df=Math.min(df,sdBox(px+.5,py+.5,st.sx,st.sy,st.hw,st.hh,SR));
       const i=(py*W+px)*4;
       if(brickStyle==='outline'||brickStyle==='dashed'){
         if(db<=0){
           buf[i]=buf[i+1]=buf[i+2]=255;
+          // Top-view studs lie inside the plate sdf; still draw ring so Line/Dash styles show knobs.
+          for(const st of visibleStuds){
+            const dx=px+.5-st.sx,dy=py+.5-st.sy;
+            if(brickStyle==='outline'){
+              const dist=Math.sqrt((dx*dx)/(st.hw*st.hw)+(dy*dy)/(st.hh*st.hh));
+              if(dist<=1&&dist>1-strokeW/Math.min(st.hw,st.hh)){buf[i]=buf[i+1]=buf[i+2]=col;break;}
+            } else {
+              const nx=dx/st.hw,ny=dy/st.hh,e=nx*nx+ny*ny;
+              if(e<=1&&e>(1-.18)){buf[i]=buf[i+1]=buf[i+2]=col;break;}
+            }
+          }
         } else if(df<=0){
           buf[i]=buf[i+1]=buf[i+2]=255;
           for(const st of visibleStuds){
@@ -1584,7 +1748,14 @@ function getSharedBottomSeam(b,bx,by,list){
 }
 
 function drawBodyEdges(buf,W,H,b,bx,by,col,list){
-  if(b.view==='top') return;
+  if(b.view==='top'){
+    const hw=brickW(b.size)/2,hd=U/2;
+    const xL=Math.round(bx-hw),xR=Math.round(bx+hw),yT=Math.round(by-hd),yB=Math.round(by+hd);
+    const setPx=(x,y)=>{ if(x>=0&&y>=0&&x<W&&y<H){ const i=(y*W+x)*4; buf[i]=buf[i+1]=buf[i+2]=col; buf[i+3]=255; } };
+    for(let x=xL;x<=xR;x++){ setPx(x,yT); setPx(x,yB); }
+    for(let y=yT;y<=yB;y++){ setPx(xL,y); setPx(xR,y); }
+    return;
+  }
   const hw=(b.rotated?BH/2:brickW(b.size)/2);
   const hh=BH/2;
   const xL=Math.round(bx-hw), xR=Math.round(bx+hw);
@@ -1864,22 +2035,24 @@ function bindParamControls(){
 
 function buildPanelPills(){
   const txC=document.getElementById('tx-pills'); txC.innerHTML='';
-  for(const tx of ALL_TX){
-    const p=document.createElement('button'); p.className='pill'; p.textContent=tx;
+  for(const o of TRANSFORM_OPTIONS){
+    const p=document.createElement('button'); p.type='button'; p.className='pill';
+    p.textContent=o.label; p.title=o.title; p.dataset.txId=o.id;
     p.addEventListener('click',()=>{
-      panelTx=tx;
-      txC.querySelectorAll('.pill').forEach(q=>q.classList.toggle('selected',q.textContent===tx));
+      panelTx=o.id;
+      txC.querySelectorAll('.pill').forEach(q=>q.classList.toggle('selected',q.dataset.txId===o.id));
       refreshParamControlVisibility();
       livePreview();
     });
     txC.appendChild(p);
   }
   const mC=document.getElementById('method-pills'); mC.innerHTML='';
-  for(const m of ALL_MTH){
-    const p=document.createElement('button'); p.className='pill'; p.textContent=m;
+  for(const o of METHOD_OPTIONS){
+    const p=document.createElement('button'); p.type='button'; p.className='pill';
+    p.textContent=o.label; p.title=o.title; p.dataset.mthId=o.id;
     p.addEventListener('click',()=>{
-      panelMethod=m;
-      mC.querySelectorAll('.pill').forEach(q=>q.classList.toggle('selected',q.textContent===m));
+      panelMethod=o.id;
+      mC.querySelectorAll('.pill').forEach(q=>q.classList.toggle('selected',q.dataset.mthId===o.id));
       refreshParamControlVisibility();
       livePreview();
     });
@@ -1911,11 +2084,11 @@ function openCustomPanel(brick,sx,sy){
   syncParamControlsFromParams(brick._previewParams);
   refreshParamControlVisibility();
 
-  document.querySelectorAll('#tx-pills .pill').forEach(p=>p.classList.toggle('selected',p.textContent===panelTx));
-  document.querySelectorAll('#method-pills .pill').forEach(p=>p.classList.toggle('selected',p.textContent===panelMethod));
+  document.querySelectorAll('#tx-pills .pill').forEach(p=>p.classList.toggle('selected',p.dataset.txId===panelTx));
+  document.querySelectorAll('#method-pills .pill').forEach(p=>p.classList.toggle('selected',p.dataset.mthId===panelMethod));
 
   const panel=document.getElementById('custom-panel');
-  const pw=268, ph=320;
+  const pw=288, ph=380;
   let px=sx+14, py=sy-ph/2;
   if(px+pw>canvas.width) px=sx-pw-14;
   if(py<8) py=8;
@@ -1959,8 +2132,8 @@ document.getElementById('panel-random').addEventListener('click',()=>{
   if(customTargetBrick) customTargetBrick._previewParams=makeParams();
   if(customTargetBrick) syncParamControlsFromParams(customTargetBrick._previewParams);
   refreshParamControlVisibility();
-  document.querySelectorAll('#tx-pills .pill').forEach(p=>p.classList.toggle('selected',p.textContent===panelTx));
-  document.querySelectorAll('#method-pills .pill').forEach(p=>p.classList.toggle('selected',p.textContent===panelMethod));
+  document.querySelectorAll('#tx-pills .pill').forEach(p=>p.classList.toggle('selected',p.dataset.txId===panelTx));
+  document.querySelectorAll('#method-pills .pill').forEach(p=>p.classList.toggle('selected',p.dataset.mthId===panelMethod));
   livePreview();
 });
 
@@ -2029,7 +2202,7 @@ canvas.addEventListener('mousedown',e=>{
     const {b,i}=hit;
     if(e.shiftKey){
       toggleSelection(b);
-      renderFrame();
+  renderFrame();
       return;
     }
     if(!selectedBricks.has(b)) { clearSelection(); selectGroupOf(b); }
@@ -2301,7 +2474,7 @@ window.addEventListener('mouseup',()=>{
 });
 canvas.addEventListener('touchstart',e=>{
   if(viewMode==='2d'&&e.touches.length===2){
-    e.preventDefault();
+  e.preventDefault();
     const t1=e.touches[0],t2=e.touches[1];
     const cx=(t1.clientX+t2.clientX)/2, cy=(t1.clientY+t2.clientY)/2;
     touchGesture={
@@ -2318,7 +2491,7 @@ canvas.addEventListener('touchstart',e=>{
 },{passive:false});
 window.addEventListener('touchmove',e=>{
   if(touchGesture&&viewMode==='2d'&&e.touches.length===2){
-    e.preventDefault();
+  e.preventDefault();
     const t1=e.touches[0],t2=e.touches[1];
     const cx=(t1.clientX+t2.clientX)/2, cy=(t1.clientY+t2.clientY)/2;
     const dist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
@@ -2612,7 +2785,7 @@ function saveClean(){
     for(let py=y0;py<=y1;py++){for(let px=x0;px<=x1;px++){
       const dc=sdfBody(px+.5,py+.5,bx,by,b.view,b.rotated,b.size);
       let df=dc;
-      for(const st of visStuds){const sdx=Math.abs(px+.5-st.sx)-st.hw,sdy=Math.abs(py+.5-st.sy)-st.hh;df=Math.min(df,Math.min(Math.max(sdx,sdy),0)+Math.sqrt(Math.max(sdx,0)**2+Math.max(sdy,0)**2));}
+      for(const st of visStuds) df=Math.min(df,sdBox(px+.5,py+.5,st.sx,st.sy,st.hw,st.hh,SR));
       const i=(py*W+px)*4;
       if(brickStyle==='outline'||brickStyle==='dashed'){
         if(dc<=0){
@@ -2660,6 +2833,7 @@ function saveClean(){
   const a=document.createElement('a');
   a.download=currentComp&&currentComp.name==='Alphabet'?'brick_letter_'+(LETTERS[currentLetterIndex]||'A')+'.png':
     currentComp&&currentComp.name==='Word'?'brick_word_'+currentWord+'.png':
+    currentComp&&currentComp.name==='Imported'?'brick_imported.png':
     'brick_'+String(resultCount).padStart(3,'0')+'.png';
   a.href=oc.toDataURL('image/png');a.click();
 }
@@ -2745,6 +2919,11 @@ document.addEventListener('click',e=>{
 });
 document.getElementById('btn-rotate-sel').addEventListener('click',()=>document.getElementById('more-menu').classList.remove('visible'));
 document.getElementById('btn-select-mode').addEventListener('click',()=>document.getElementById('more-menu').classList.remove('visible'));
+document.getElementById('btn-imported').addEventListener('click',()=>{ enterImportedModeBlank(); });
+document.getElementById('label-c').addEventListener('click',()=>{
+  if(!document.getElementById('label-c').classList.contains('is-active')) return;
+  cycleAlphabetPerspective();
+});
 document.getElementById('btn-random').addEventListener('click',()=>{if(phase==='dissolving'||phase==='condensing')return;if(typeMode)exitTypeMode();triggerNext();});
 document.getElementById('btn-letters').addEventListener('click',()=>{
   if(phase==='dissolving'||phase==='condensing')return;
@@ -2766,12 +2945,19 @@ document.getElementById('btn-library-toggle').addEventListener('click',()=>{
   const btn=document.getElementById('btn-library-toggle');
   const panel=document.getElementById('library-panel');
   if(!btn||!panel) return;
+  if(phase==='dissolving'||phase==='condensing') return;
   const open=!panel.classList.contains('library-panel--open');
-  panel.classList.toggle('library-panel--open',open);
-  btn.setAttribute('aria-expanded',open?'true':'false');
-  panel.setAttribute('aria-hidden',open?'false':'true');
-  syncLibraryPanelLayout();
-  if(open) loadLibrary();
+  if(open){
+    const alreadyImp=currentComp&&currentComp.name==='Imported';
+    if(!alreadyImp||bricks.length===0){
+      if(!prepareImportedBlankWorkboard()) return;
+      applyImportedEmptyBundleUi();
+      document.getElementById('status-hint').textContent='Blank canvas · Library to import · Add Brick to start';
+    }
+    openLibraryPanel();
+  } else {
+    closeLibraryPanel();
+  }
 });
 supabaseClient=initSupabaseClient();
 refreshShareSubmitUi();
@@ -2826,17 +3012,24 @@ function setStatus(s){
   dot.className='';
   if(s==='holding'){dot.classList.add('active');text.textContent='holding';
     if(hint&&viewMode==='2d'){
-      if(currentComp&&currentComp.name==='Alphabet') hint.textContent='← → to change letter · 3D to view · click brick to annotate · S to save';
+      if(currentComp&&currentComp.name==='Alphabet') hint.textContent='← → letter · click perspective name to cycle · 3D to view · brick to annotate · S save';
+      else if(currentComp&&currentComp.name==='Imported'){
+        hint.textContent=bricks.length
+          ? 'Imported layout · Next = new build · Library for more shares'
+          : 'Blank canvas · Library to import · Add Brick';
+      }
       else hint.textContent='drag · dbl-click=rotate · right-click=more';
     }}
   if(s==='condensing'){dot.classList.add('active');text.textContent='assembling';}
   if(s==='dissolving'){dot.classList.add('dissolving');text.textContent='dissolving';}
+  refreshLabelCPerspectiveClickable();
 }
 
 // ── Type mode ──
 function enterTypeMode(){
   // Type input is a 2D editing mode; never show it together with 3D panels.
   if(viewMode==='3d') setViewMode('2d');
+  clearImportedLayoutModeUi();
   typeMode=true;bricks=[];phase='idle';
   unhighlight3d();
   if(animId){cancelAnimationFrame(animId);animId=null;}
@@ -2852,6 +3045,7 @@ function enterTypeMode(){
   document.getElementById('label-a').textContent='Word';
   document.getElementById('label-c').textContent='—';
   document.getElementById('label-count').textContent='—';
+  refreshLabelCPerspectiveClickable();
 }
 function exitTypeMode(){
   typeMode=false;
@@ -3294,21 +3488,62 @@ document.getElementById('view-angles').addEventListener('click',e=>{
 //  ORIGINAL SDF HELPERS (for built-in renderer)
 // ════════════════════════════════════════════════════════════
 function getSDF(px,py,bx,by,view,rotated,size){if(view==='side')return sdfSide(px,py,bx,by,size);if(view==='top')return sdfTop(px,py,bx,by,size);return sdfFront(px,py,bx,by,rotated,size);}
-function getStudCenters(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return[{sx:bx,sy:by-BH/2-SH/2,hw:BH*0.28,hh:SH/2}];if(view==='top')return[];const n=size||4,studY=by-BH/2-SH/2,studs=[];for(let i=0;i<n;i++)studs.push(bx-w/2+U*(i+.5));return studs.map(sx=>({sx,sy:studY,hw:SW/2,hh:SH/2}));}
+function getStudCenters(bx,by,view,rotated,size){
+  const w=brickW(size);
+  if(view==='side'||rotated)return[{sx:bx,sy:by-BH/2-SH/2,hw:SW/2,hh:SH/2}];
+  if(view==='top'){
+    const n=size||4,pr=SW/2,studs=[];
+    for(let i=0;i<n;i++){
+      const sx=bx-w/2+U*(i+0.5);
+      studs.push({sx,sy:by,hw:pr,hh:pr});
+    }
+    return studs;
+  }
+  const n=size||4,studY=by-BH/2-SH/2,studs=[];for(let i=0;i<n;i++)studs.push(bx-w/2+U*(i+.5));return studs.map(sx=>({sx,sy:studY,hw:SW/2,hh:SH/2}));
+}
 function getStudGradient(px,py,bx,by,view,rotated,size){const studs=getStudCenters(bx,by,view,rotated,size);for(const{sx,sy,hw,hh}of studs){const nx=(px-sx)/hw,ny=(py-sy)/hh,e=nx*nx+ny*ny;if(e<=1)return Math.max(0,1-e);}return -1;}
-function sdfBody(px,py,bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return sdBox(px,py,bx,by,BH/2,BH/2,BR);if(view==='top')return sdBox(px,py,bx,by,w/2,BH*.22,BR);return sdBox(px,py,bx,by,w/2,BH/2,BR);}
-function getBounds(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return{x0:bx-BH/2-2,x1:bx+BH/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};if(view==='top')return{x0:bx-w/2-2,x1:bx+w/2+2,y0:by-BH*.25-2,y1:by+BH*.25+2};return{x0:bx-w/2-SW/2-2,x1:bx+w/2+SW/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};}
+function sdfBody(px,py,bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return sdBox(px,py,bx,by,BH/2,BH/2,BR);if(view==='top')return sdBox(px,py,bx,by,w/2,U/2,BR);return sdBox(px,py,bx,by,w/2,BH/2,BR);}
+function getBounds(bx,by,view,rotated,size){const w=brickW(size);if(view==='side'||rotated)return{x0:bx-BH/2-2,x1:bx+BH/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};if(view==='top'){const hd=U/2;return{x0:bx-w/2-2,x1:bx+w/2+2,y0:by-hd-2,y1:by+hd+2};}return{x0:bx-w/2-SW/2-2,x1:bx+w/2+SW/2+2,y0:by-BH/2-SH-2,y1:by+BH/2+2};}
 function sdfFront(px,py,bx,by,rotated,size){if(rotated)return sdfSide(px,py,bx,by,size);const w=brickW(size),n=size||4;let d=sdBox(px,py,bx,by,w/2,BH/2,BR);const top=by-BH/2;for(let i=0;i<n;i++){const sx=bx-w/2+U*(i+.5);d=Math.min(d,sdBox(px,py,sx,top-SH/2,SW/2,SH/2,SR));}return d;}
 function sdfSide(px,py,bx,by){let d=sdBox(px,py,bx,by,BH/2,BH/2,BR);return Math.min(d,sdBox(px,py,bx,by-BH/2-SH/2,SW/2,SH/2,SR));}
-function sdfTop(px,py,bx,by,size){const w=brickW(size);return sdBox(px,py,bx,by,w/2,BH*.22,BR);}
+function sdfTop(px,py,bx,by,size){const w=brickW(size);const hd=U/2;return sdBox(px,py,bx,by,w/2,hd,BR);}
 function sdBox(px,py,cx,cy,hw,hh,r){r=r||0;const qx=Math.abs(px-cx)-hw+r,qy=Math.abs(py-cy)-hh+r;return Math.min(Math.max(qx,qy),0)+Math.sqrt(Math.max(qx,0)**2+Math.max(qy,0)**2)-r;}
 
 // ════════════════════════════════════════════════════════════
 //  PROJECTIONS
 // ════════════════════════════════════════════════════════════
 function projFront(bs,cx,cy){return bs.map(b=>({x:b.x,y:b.y,view:'front'}));}
-function projSide(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*(BH/BW),y:cy+(b.y-mcy),view:'front'}));}
-function projTop(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx),y:cy+(b.y-mcy)*.4,view:'front'}));}
+/** Right side elevation: each stud row keeps the rightmost brick only; stacked 1×1 side views centered at cx. Only the top piece shows studs (lower covered via getCoveredStudXs). Same rule for all compositions (Word = one merged silhouette if rows align). */
+function projSide(bs,cx,cy){
+  if(!bs.length) return[];
+  const mcy=avg(bs.map(b=>b.y));
+  const byRow=new Map();
+  for(const b of bs){
+    const row=Math.round((b.y-mcy)/BSTK);
+    const prev=byRow.get(row);
+    if(!prev||b.x>prev.x) byRow.set(row,{y:b.y});
+  }
+  const exposed=[...byRow.values()].sort((a,b)=>a.y-b.y);
+  const n=exposed.length;
+  const out=[];
+  for(let i=0;i<n;i++)
+    out.push({x:cx,y:cy-(n-1)*BSTK/2+i*BSTK,view:'side',size:1});
+  return out;
+}
+/** Bird’s-eye: only bricks visible from above — per front-view column (x), keep the topmost stud row; flatten to one line. */
+function projTop(bs,cx,cy){
+  if(!bs.length) return[];
+  const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));
+  const byCol=new Map();
+  for(const b of bs){
+    const col=Math.round((b.x-mcx)/BW);
+    const prev=byCol.get(col);
+    if(!prev||b.y<prev.y) byCol.set(col,{x:b.x,y:b.y,size:b.size||4});
+  }
+  const exposed=[...byCol.values()].sort((a,b)=>a.x-b.x);
+  const rowY=exposed.length?Math.min(...exposed.map(b=>b.y)):mcy;
+  return exposed.map(b=>({x:cx+(b.x-mcx),y:cy+(rowY-mcy),view:'top',size:b.size||4}));
+}
 function projIso(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>{const dx=b.x-mcx,dy=b.y-mcy;return{x:cx+(dx-dy*.3)*.75,y:cy+(dx*.25+dy*.5)*.75,view:'front'};});}
 function projCloseup(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*2.5,y:cy+(b.y-mcy)*2.5,view:'front'}));}
 function projExploded(bs,cx,cy){const mcx=avg(bs.map(b=>b.x)),mcy=avg(bs.map(b=>b.y));return bs.map(b=>({x:cx+(b.x-mcx)*1.8,y:cy+(b.y-mcy)*1.8,view:'front'}));}
