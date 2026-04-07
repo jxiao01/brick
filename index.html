@@ -171,7 +171,9 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js"></script>
-<!-- Optional local file (gitignored): copy brick-config.local.example.js → brick-config.local.js -->
+<!-- brick-config.js: committed defaults for deploy; replace with real URL/key on your host if needed -->
+<script src="brick-config.js"></script>
+<!-- Optional override (gitignored): copy brick-config.local.example.js → brick-config.local.js -->
 <script src="brick-config.local.js"></script>
 <script>
 (function(){
@@ -336,7 +338,7 @@ body { background:#fff; font-family:Helvetica,Arial,sans-serif; height:100vh; di
     <div class="info-row"><span class="info-key"><kbd>S</kbd></span><span class="info-desc">Save as PNG</span></div>
     <div class="info-row"><span class="info-key"><kbd>Share</kbd></span><span class="info-desc">Submit layout to Supabase gallery (when configured)</span></div>
     <h3>Shared gallery (Supabase)</h3>
-    <div class="info-row"><span class="info-key">Setup</span><span class="info-desc">Run <kbd>supabase-schema.sql</kbd> · copy <kbd>brick-config.local.example.js</kbd> → <kbd>brick-config.local.js</kbd> (url + key)</span></div>
+    <div class="info-row"><span class="info-key">Setup</span><span class="info-desc">Run <kbd>supabase-schema.sql</kbd> · set <kbd>brick-config.js</kbd> on your host (or use gitignored <kbd>brick-config.local.js</kbd> locally)</span></div>
     <div class="info-row"><span class="info-key">Library</span><span class="info-desc"><kbd>View</kbd> = 2D preview · <kbd>Import</kbd> restores bricks + mode (Alphabet / Word / composition name + perspective) when the item was shared from a recent build</span></div>
     <h3>3D Mode</h3>
     <div class="info-row"><span class="info-key">Drag</span><span class="info-desc">Orbit camera</span></div>
@@ -1346,7 +1348,7 @@ async function loadLibrary(){
   const statusEl=document.getElementById('library-status');
   if(!listEl||!emptyEl) return;
   if(!supabaseClient||!isSupabaseConfigured()){
-    if(statusEl) statusEl.textContent='Configure brick-config.local.js';
+    if(statusEl) statusEl.textContent='Supabase not set: edit brick-config.js on your host (or add brick-config.local.js with url + anon key), then refresh.';
     emptyEl.style.display='block';
     return;
   }
