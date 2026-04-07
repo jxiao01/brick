@@ -20,6 +20,7 @@ alter table public.brick_submissions enable row level security;
 -- Visitors may insert rows (browser uses anon / publishable JWT).
 -- Use TO public so all client roles match (avoids RLS mismatch on newer projects).
 drop policy if exists "brick_submissions_insert_anon" on public.brick_submissions;
+drop policy if exists "brick_submissions_allow_insert" on public.brick_submissions;
 create policy "brick_submissions_allow_insert"
   on public.brick_submissions
   for insert
